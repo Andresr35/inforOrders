@@ -1,19 +1,21 @@
-from distutils.log import error
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 import time
 import traceback
+from WebDriver import EnviromentSetUp
 
 
-class fufillOrders:
+class fufillOrders(EnviromentSetUp):
+
+    
+
     def login(user,password):
         try:
-            web = webdriver.Chrome()
-
+            whatever = EnviromentSetUp
+            whatever.setUp()
+            web = EnviromentSetUp.web
             #this is the first page that they will be led to, which is some weird login
             web.get("https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524?favoriteContext=oeet.initiate&LogicalId=lid://infor.sx.1")
             signInUser=web.find_element(By.XPATH,'//*[@id="userNameInput"]')
@@ -52,96 +54,103 @@ class fufillOrders:
             inforSubmit.click()
             inforOp = wait.until(EC.visibility_of_element_located((By.CLASS_NAME,'btn-modal-primary')))
             inforOp.click()
-            return web
+            print("logged in")
             
+
         except Exception:
             print("Wasn't able to login")
             traceback.print_exc()
-            return web
+           
+    def closeWeb():
+        EnviromentSetUp.closeWeb()
+   
+    def setUpOrder(po,name,address,city,state,zip,country,customer="40010"):
+        #just gets ready to actually start looping through orders
+        web = EnviromentSetUp.web
+        wait = WebDriverWait(web,10)
+        # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
+        customerField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
+        customerField.send_keys(str(customer))
 
+        warehouse=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
+        warehouse.send_keys('V01')
 
-        # # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
-        # customer = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')
-        # customer.send_keys(2124)
-
-        # warehouse=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
-        # warehouse.send_keys('V01')
 
         # shipvia=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
+        # print(shipvia.get_attribute("value"))
+        # print("text should be ^")
         # time.sleep(3)
         # shipvia.clear()
-        # shipvia.send_keys('PPA')
+        # shipvia.send_keys('UG')
+        time.sleep(.5)
+        orderID=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
+        orderID.send_keys(str(po))#--------------------------------------------------------------ADD ONE
 
-        # orderID=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
-        # orderID.send_keys(54371)#--------------------------------------------------------------ADD ONE
+        initNext=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
+        initNext.click()
 
-        # initNext=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
-        # initNext.click()
-        # time.sleep(5)
+        # edit ship to address| three dot settings line entry quick| quantity| part number | add
+        editShip=wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
+        editShip.click()
+        
 
-        # # edit ship to address| three dot settings line entry quick| quantity| part number | add
-        # editShip=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')
-        # editShip.click()
-        # time.sleep(3)
+        nameField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/div/input')))
+        nameField.clear()
+        nameField.send_keys(str(name))
 
-        # name = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/div/input')
-        # name.clear()
-        # name.send_keys("testName")
+        addressField =web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')
+        addressField.clear()
+        addressField.send_keys(str(address))
 
-        # address =web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')
-        # address.clear()
-        # address.send_keys('8750 Pioneer')
+        cityField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')
+        cityField.clear()
+        cityField.send_keys(str(city))
 
-        # city = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')
-        # city.clear()
-        # city.send_keys('testCity')
+        stateField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
+        stateField.clear()
+        stateField.send_keys(str(state))
 
-        # state = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
-        # state.clear()
-        # state.send_keys('CA')
+        zipField=web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
+        zipField.clear()
+        zipField.send_keys(zip)
 
-        # zip=web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
-        # zip.clear()
-        # zip.send_keys(90670)
+        countryField = Select(web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/select'))
+        countryField.select_by_visible_text(str(country))
 
-        # country = Select(web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/select'))
-        # country.select_by_visible_text("United States")
+        enterAddress = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[3]/button[2]')
+        enterAddress.click()
+        
+        settings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
+        settings.click()
 
-        # enterAddress = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[3]/button[2]')
-        # enterAddress.click()
+        lineEntry = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
+        lineEntry.click()
 
-        # web.maximize_window()
+        quickLine = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
+        quickLine.click()
+        
+    
+    def addLineItem(sku,quantity):
+        web=EnviromentSetUp.web
+        wait = WebDriverWait(web,10)
 
-        # settings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
-        # settings.click()
+        product = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')))
+        product.send_keys(str(sku))
 
-        # lineEntry = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
-        # lineEntry.click()
+        quantityField = web.find_element(By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')
+        quantityField.click()
+        quantityField.clear()    
+        quantityField.send_keys(quantity)
 
-        # quickLine = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
-        # quickLine.click()
-        # time.sleep(3)
+        add =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
+        add.click()
+    
+    def finishOrder(): 
+        web=EnviromentSetUp.web
+        wait =WebDriverWait(web,10)
 
-        # product = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')
-        # product.send_keys("gh-12050")
+        addLines = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
+        addLines.click()
 
-        # quantity = web.find_element(By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')
-        # quantity.click()
-        # quantity.clear()    
-        # quantity.send_keys(5)
-
-        # add =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
-        # add.click()
-        # time.sleep(2)
-        # # add lines | three dots customer order settings | check stuff???????????? save | back | Finsih
-
-        # addLines = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')
-        # addLines.click()
-        # time.sleep(3)
-
-        # customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
-        # customerSettings.click()
-        # time.sleep(3)
-
-        # input()
-        # web.close()
+        customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
+        customerSettings.click()
