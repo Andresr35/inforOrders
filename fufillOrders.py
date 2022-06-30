@@ -26,10 +26,19 @@ class fufillOrders:
 
             #https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524
             # this is the second page that they will be led to, which is the infor loging
-            # time.sleep(5)
-            wait.until(EC.frame_to_be_available_and_switch_to_it((By.NAME,"sxeweb_d7de089b-7e09-4476-a5f5-80697edc7524")))#class =m-app-frame
+          
             
+            #checking to see if the document management tab is open cause it needs to be closed
+            documentMng = wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@id="body"]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]')))
+            if ("expanded" in documentMng.get_attribute("class")):
+                close = web.find_element(By.XPATH,'/html/body/div[2]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]/button')
+                close.click()
+                print("i closed it")
+            elif("collapsed" in documentMng.get_attribute("class")):
+                print("it is closed")
 
+            #entering the frame inside the infor website which is where all the action is
+            wait.until(EC.frame_to_be_available_and_switch_to_it((By.NAME,"sxeweb_d7de089b-7e09-4476-a5f5-80697edc7524")))#class =m-app-frame
             inforUser = wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@id="signin-userid"]')))
             inforUser.send_keys(str(user))
 
@@ -41,12 +50,10 @@ class fufillOrders:
 
             inforSubmit=web.find_element(By.XPATH,'//*[@id="sign-in-view"]/section/form/button')
             inforSubmit.click()
-            time.sleep(1)
-            inforOp=web.find_element(By.CLASS_NAME,'btn-modal-primary')
-
+            inforOp = wait.until(EC.visibility_of_element_located((By.CLASS_NAME,'btn-modal-primary')))
             inforOp.click()
-            time.sleep(5)
             return web
+            
         except Exception:
             print("Wasn't able to login")
             traceback.print_exc()
