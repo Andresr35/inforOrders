@@ -1,15 +1,17 @@
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.ui import Select
+import json
 import time
 import traceback
+from pytz import country_names
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+
 from WebDriver import EnviromentSetUp
 
 
 class fufillOrders(EnviromentSetUp):
-
-    
 
     def login(user,password):
         try:
@@ -129,8 +131,7 @@ class fufillOrders(EnviromentSetUp):
         quickLine = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
         quickLine.click()
         
-    
-    def addLineItem(sku,quantity):
+    def addLineItem(sku,quantity,price:float):
         web=EnviromentSetUp.web
         wait = WebDriverWait(web,10)
 
@@ -142,15 +143,125 @@ class fufillOrders(EnviromentSetUp):
         quantityField.clear()    
         quantityField.send_keys(quantity)
 
+        priceField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')
+        priceField.clear()
+        time.sleep(0.5)
+        priceField.click()
+        priceField.send_keys(price)
+
         add =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
         add.click()
     
-    def finishOrder(): 
-        web=EnviromentSetUp.web
-        wait =WebDriverWait(web,10)
+    def finishOrder(shipping,discount,zip:int): 
+        try:
+            web=EnviromentSetUp.web
+            wait =WebDriverWait(web,10)
 
-        addLines = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
-        addLines.click()
 
-        customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
-        customerSettings.click()
+            data = json.loads(open("cities.json").read())
+
+            for i in data:
+                if i['zip_code'] == zip:
+                    county =(i['county'])
+                    state = (i['state'])
+                    city = (i['city'])
+                    break
+
+            addLines = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
+            addLines.click()
+
+            taxButton = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3]')))
+            taxButton.click()
+
+            if (state == "CA"):
+                countryDrop = wait.until(EC.presence_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
+                countryDrop.click()
+                time.sleep(0.5)
+                countryDrop=web.find_element(By.XPATH,'/html/body/div[8]/span')
+                countryDrop.click()
+                countyField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div')
+                countyField.click()
+                time.sleep(0.25)
+                county = str(county).upper()
+                countyList = web.find_element(By.XPATH,'/html/body/div[8]/ul')
+
+                for child in countyList.find_elements(By.XPATH,'.//*'):
+                    for otherChild in child.find_elements(By.XPATH,'.//*'):               
+                        
+                        if(otherChild.get_attribute("innerHTML") == county.replace(" ","")):
+                            otherChild.click()
+                            break
+                        elif(otherChild.get_attribute("innerHTML") == county):
+                            otherChild.click()
+                            break
+                    else:
+                        continue
+                    break
+
+                cityField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[3]/div/div')
+                cityField.click()
+                time.sleep(0.25)
+                city = str(city).upper()
+                if(len(city)>12):
+                    betterCity = city[0:12]
+                county = county.replace(" ","")
+                betterCounty =county[0:4]
+                betterCity+="-"+betterCounty
+                cityList = web.find_element(By.XPATH,'/html/body/div[8]/ul')
+
+                for child in cityList.find_elements(By.XPATH,'.//*'):
+                    for otherChild in child.find_elements(By.XPATH,'.//*'):
+                        print(otherChild.get_attribute("innerHTML"))
+                        #SANTA FE SPR-LOSA first 12 + "-LOSA"
+                        #RANCHO DOMIN-LOSA    HACIENDA HEI-LOSA
+                        if(otherChild.get_attribute("innerHTML") == betterCity.replace(" ","")):
+                            otherChild.click()
+                            break
+                        elif(otherChild.get_attribute("innerHTML") == betterCity):
+                            otherChild.click()
+                            break
+                    else:
+                        continue
+                    break
+                    
+
+            recalculate = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
+            recalculate.click()
+            time.sleep(1)
+            addons = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
+            addons.click()
+
+            addShipping = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[1]/td[1]/div/button')))
+            addShipping.click()
+            
+            freight = Select(wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[1]/select'))))
+            freight.select_by_value('freight charge')
+            
+            freightAmount =wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[2]/input')))
+            freightAmount.clear()
+            freightAmount.send_keys(shipping)
+
+            finishFreight = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[2]/div[2]/button[1]')
+            finishFreight.click()
+
+            goBack = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[1]/div/button')
+            goBack.click()
+
+            discounts = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[4]')
+            discounts.click()
+
+            discountAmount = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')
+            discountAmount.clear()
+            discountAmount.send_keys(discount)
+
+            discountType = Select(web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/select'))
+            discountType.select_by_visible_text("Amount")
+
+            submit =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')
+            submit.click()
+        
+        except Exception:
+            print("Wasn't able to login")
+            traceback.print_exc()
+        # customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
+        # customerSettings.click()

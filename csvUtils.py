@@ -12,6 +12,6 @@ class csvUtils:
         # print(rawCSV.loc[rawCSV['Name'] == "FB38486"]) looking for specific values in the data
         # rawCSV["andresTest"] = "test worked" adding in new keys and values
         # rawCSV = rawCSV.drop(columns=['Name '])
-        finalCSV = rawCSV[["Name","Lineitem quantity","Lineitem price","Lineitem sku","Shipping Name","Shipping Street","Shipping City","Shipping Zip","Shipping Province","Shipping Country"]]
+        finalCSV = rawCSV[["Name","Lineitem quantity","Lineitem price","Lineitem sku","Shipping Name","Shipping Street","Shipping City","Shipping Zip","Shipping Province","Shipping Country","Shipping","Discount Amount"]]
         return finalCSV
     
