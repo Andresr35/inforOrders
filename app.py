@@ -36,7 +36,7 @@ class Window:
         if event == 'Ok':
             print(csvUtils.readCSV(csvInput))
             fufillOrders.login("ANR","ANR@0117")
-            fufillOrders.setUpOrder("test58","testName","testAddress","Santa Fe Springs","CA",90670,"United States","40010")
+            fufillOrders.setUpOrder("test64","testName","testAddress","Santa Fe Springs","CA",90670,"United States","40010")
             fufillOrders.addLineItem("FB-CT202-4",2,40)
             fufillOrders.addLineItem("F5-MES008-FE-BDK",4,30)
             fufillOrders.finishOrder(20,2,90670)

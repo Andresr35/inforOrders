@@ -58,7 +58,6 @@ class fufillOrders(EnviromentSetUp):
             inforOp.click()
             print("logged in")
             
-
         except Exception:
             print("Wasn't able to login")
             traceback.print_exc()
@@ -66,93 +65,104 @@ class fufillOrders(EnviromentSetUp):
     def closeWeb():
         EnviromentSetUp.closeWeb()
    
-    def setUpOrder(po,name,address,city,state,zip,country,customer="40010"):
-        #just gets ready to actually start looping through orders
-        web = EnviromentSetUp.web
-        wait = WebDriverWait(web,10)
-        # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
-        customerField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
-        customerField.send_keys(str(customer))
+    def setUpOrder(po,name,address,city,state,zip,country,customer="40010"):     
+        try:
 
-        warehouse=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
-        warehouse.send_keys('V01')
+         #just gets ready to actually start looping through orders
+            web = EnviromentSetUp.web
+            wait = WebDriverWait(web,10)
+            # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
+            customerField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
+            customerField.send_keys(str(customer))
+
+            warehouse=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
+            warehouse.send_keys('V01')
 
 
-        # shipvia=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
-        # print(shipvia.get_attribute("value"))
-        # print("text should be ^")
-        # time.sleep(3)
-        # shipvia.clear()
-        # shipvia.send_keys('UG')
-        time.sleep(.5)
-        orderID=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
-        orderID.send_keys(str(po))#--------------------------------------------------------------ADD ONE
+            # shipvia=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
+            # print(shipvia.get_attribute("value"))
+            # print("text should be ^")
+            # time.sleep(3)
+            # shipvia.clear()
+            # shipvia.send_keys('UG')
+            time.sleep(.5)
+            orderID=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
+            orderID.send_keys(str(po))#--------------------------------------------------------------ADD ONE
 
-        initNext=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
-        initNext.click()
+            initNext=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
+            initNext.click()
 
-        # edit ship to address| three dot settings line entry quick| quantity| part number | add
-        editShip=wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
-        editShip.click()
+            # edit ship to address| three dot settings line entry quick| quantity| part number | add
+            editShip=wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
+            editShip.click()
+            
+
+            nameField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/div/input')))
+            nameField.clear()
+            nameField.send_keys(str(name))
+
+            addressField =web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')
+            addressField.clear()
+            addressField.send_keys(str(address))
+
+            cityField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')
+            cityField.clear()
+            cityField.send_keys(str(city))
+
+            stateField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
+            stateField.clear()
+            stateField.send_keys(str(state))
+
+            zipField=web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
+            zipField.clear()
+            zipField.send_keys(zip)
+
+            countryField = Select(web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/select'))
+            countryField.select_by_visible_text(str(country))
+
+            enterAddress = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[3]/button[2]')
+            enterAddress.click()
+            
+            settings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
+            settings.click()
+
+            lineEntry = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
+            lineEntry.click()
+
+            quickLine = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
+            quickLine.click()
         
-
-        nameField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/div/input')))
-        nameField.clear()
-        nameField.send_keys(str(name))
-
-        addressField =web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')
-        addressField.clear()
-        addressField.send_keys(str(address))
-
-        cityField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')
-        cityField.clear()
-        cityField.send_keys(str(city))
-
-        stateField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
-        stateField.clear()
-        stateField.send_keys(str(state))
-
-        zipField=web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
-        zipField.clear()
-        zipField.send_keys(zip)
-
-        countryField = Select(web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/select'))
-        countryField.select_by_visible_text(str(country))
-
-        enterAddress = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[3]/button[2]')
-        enterAddress.click()
-        
-        settings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
-        settings.click()
-
-        lineEntry = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
-        lineEntry.click()
-
-        quickLine = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
-        quickLine.click()
-        
-    def addLineItem(sku,quantity,price:float):
-        web=EnviromentSetUp.web
-        wait = WebDriverWait(web,10)
-
-        product = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')))
-        product.send_keys(str(sku))
-
-        quantityField = web.find_element(By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')
-        quantityField.click()
-        quantityField.clear()    
-        quantityField.send_keys(quantity)
-
-        priceField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')
-        priceField.clear()
-        time.sleep(0.5)
-        priceField.click()
-        priceField.send_keys(price)
-
-        add =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
-        add.click()
+        except Exception:
+            print("could not setup order")
+            traceback.print_exc()
     
-    def finishOrder(shipping,discount,zip:int): 
+    def addLineItem(sku,quantity,price:float):
+        try:
+            web=EnviromentSetUp.web
+            wait = WebDriverWait(web,10)
+
+            product = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')))
+            product.send_keys(str(sku))
+
+            quantityField = web.find_element(By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')
+            quantityField.click()
+            quantityField.clear()    
+            quantityField.send_keys(quantity)
+
+            priceField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')
+            priceField.clear()
+            time.sleep(0.5)
+            priceField.click()
+            priceField.send_keys(price)
+
+            add =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
+            add.click()
+        
+        except Exception:
+            print("wasn't able to add a line item")
+            traceback.print_exc()
+
+    def finishOrder(shipping:float,discount,zip:int): 
         try:
             web=EnviromentSetUp.web
             wait =WebDriverWait(web,10)
@@ -233,35 +243,47 @@ class fufillOrders(EnviromentSetUp):
 
             addShipping = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[1]/td[1]/div/button')))
             addShipping.click()
-            
-            freight = Select(wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[1]/select'))))
-            freight.select_by_value('freight charge')
+            # i am here----------------------------------------------------------------------------------------------------------------------------------
+            freightDropdown = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[1]/div/div')))
+            freightDropdown.click()
+
+
+            freight = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[8]/ul/li[3]/a')))
+            freight.click()
             
             freightAmount =wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[2]/input')))
             freightAmount.clear()
+            time.sleep(0.5)
             freightAmount.send_keys(shipping)
 
             finishFreight = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[2]/div[2]/button[1]')
             finishFreight.click()
+            
 
-            goBack = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[1]/div/button')
+            goBack = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[1]/div/button')))
             goBack.click()
 
-            discounts = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[4]')
+            discounts = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[4]')))
             discounts.click()
 
-            discountAmount = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')
+            discountAmount = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')))
             discountAmount.clear()
             discountAmount.send_keys(discount)
 
-            discountType = Select(web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/select'))
-            discountType.select_by_visible_text("Amount")
+            discountDropdown = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/div/div')
+            discountDropdown.click()
+
+            discountType = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[8]/ul/li[1]/a')))
+            discountType.click()
 
             submit =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')
             submit.click()
+
+            finish = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')))
+            finish.click()
         
         except Exception:
-            print("Wasn't able to login")
+            print("Wasn't able to finish order")
             traceback.print_exc()
         # customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
         # customerSettings.click()
