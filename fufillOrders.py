@@ -65,13 +65,20 @@ class fufillOrders(EnviromentSetUp):
     def closeWeb():
         EnviromentSetUp.closeWeb()
    
-    def setUpOrder(po,name,address,city,state,zip,country,customer="40010"):     
+    def setUpOrder(po,name,address,city,state,zip,country):     
         try:
 
          #just gets ready to actually start looping through orders
             web = EnviromentSetUp.web
             wait = WebDriverWait(web,10)
             # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
+
+            data = json.loads(open("cities.json").read())
+
+            if(state == "CA"):
+                customer = "40010"
+            else:
+                customer = "40011"
             customerField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
             customerField.send_keys(str(customer))
 
