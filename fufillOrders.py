@@ -64,8 +64,8 @@ class fufillOrders(EnviromentSetUp):
            
     def closeWeb():
         EnviromentSetUp.closeWeb()
-   
-    def setUpOrder(po,name,address,city,state,zip,country):     
+   #AV == shopify vs paypal which changes the customer number thign ex.40010
+    def setUpOrder(po,name,address,city,state,zip,country,method):     
         try:
 
          #just gets ready to actually start looping through orders
@@ -74,11 +74,26 @@ class fufillOrders(EnviromentSetUp):
             # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
 
             data = json.loads(open("cities.json").read())
+            print(state)
+            if(method == "Shopify Payments"):
+                if(country =="US"):
+                    if(state =="CA"):
+                        customer="40010"
+                    else:
+                        customer="40011"
+                else:
+                    customer="40012"
+                
+            elif(method =="PayPal Express Checkout"):
+                if(country =="US"):
+                    if(state =="CA"):
+                        customer="40003"
+                    else:
+                        customer="40004"
+                else:
+                    customer="40005"
 
-            if(state == "CA"):
-                customer = "40010"
-            else:
-                customer = "40011"
+
             customerField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
             customerField.send_keys(str(customer))
 
@@ -86,12 +101,13 @@ class fufillOrders(EnviromentSetUp):
             warehouse.send_keys('V01')
 
 
-            # shipvia=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
+            shipvia=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
             # print(shipvia.get_attribute("value"))
             # print("text should be ^")
-            # time.sleep(3)
-            # shipvia.clear()
-            # shipvia.send_keys('UG')
+            time.sleep(.5)
+            shipvia.clear()
+            shipvia.send_keys('UG')
+
             time.sleep(.5)
             orderID=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
             orderID.send_keys(str(po))#--------------------------------------------------------------ADD ONE
@@ -123,9 +139,23 @@ class fufillOrders(EnviromentSetUp):
             zipField=web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
             zipField.clear()
             zipField.send_keys(zip)
+            if(country=="US"):
+                country = "United States"
+                
+            countryDrop = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
+            countryDrop.click()
 
-            countryField = Select(web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/select'))
-            countryField.select_by_visible_text(str(country))
+            countryList = wait.until(EC.element_to_be_clickable((By.XPATH,"/html/body/div[8]/ul")))
+
+            for child in countryList.find_elements(By.XPATH,'.//*'):
+                for otherChild in child.find_elements(By.XPATH,'.//*'):               
+                    
+                    if(otherChild.get_attribute("innerHTML") == country):
+                        otherChild.click()
+                        break
+                else:
+                    continue
+                break
 
             enterAddress = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[3]/button[2]')
             enterAddress.click()
