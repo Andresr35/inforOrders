@@ -31,25 +31,25 @@ class Window:
         csvInput = 'orders_export (4).csv'
 
         if event == 'Ok':
-        #     orders = csvUtils.readCSV(csvInput)#the dict holding all the orders
-        #     fufillOrders.login("ANR","ANR@0117")
-        #     for key,value in orders.items():
-        #         fufillOrders.setUpOrder(key,value["shippingName"],value["shippingStreet"],value["shippingCity"],value["shippingState"],value["shippingZip"],value["shippingCountry"])
-        #         #all the values of an order
-        #         for item in value["lineItems"]:
-        #             fufillOrders.addLineItem(item["sku"],item["quantity"],item["price"])
-        #             #all the values from the line items
+            orders = csvUtils.readCSV(csvInput)#the dict holding all the orders
+            fufillOrders.login("ANR","ANR@0117")
+            for key,value in orders.items():
+                fufillOrders.setUpOrder(key,value["shippingName"],value["shippingStreet"],value["shippingCity"],value["shippingState"],value["shippingZip"],value["shippingCountry"],value["method"])
+                #all the values of an order
+                for item in value["lineItems"]:
+                    fufillOrders.addLineItem(item["sku"],item["quantity"],item["price"])
+                    #all the values from the line items
                     
-        #         fufillOrders.finishOrder(value["shippingAmount"],value["discount"],value["shippingZip"])
+                fufillOrders.finishOrder(value["shippingAmount"],value["discount"],value["shippingZip"])
 
 
             print("out of loop")
             # print(json.dumps(orders,indent=4,sort_keys=True))
-            fufillOrders.login("ANR","ANR@0117")
-            fufillOrders.setUpOrder("test74","testName","testAddress","Santa Fe Springs","CA",90670,"United States","PayPal Express Checkout")
-            fufillOrders.addLineItem("F5-MES008-FE-BDK",4,30)
-            fufillOrders.finishOrder(20,2,54929)
-            # 
+            # fufillOrders.login("ANR","ANR@0117")
+            # fufillOrders.setUpOrder("test81","testName","testAddress","Clintonville","WI",54929,"United States","PayPal Express Checkout")
+            # fufillOrders.addLineItem("F5-MES008-FE-BDK",4,30)
+            # fufillOrders.finishOrder(20,2,54929)
+            # # 
             # 
             # fufillOrders.addLineItem("F5-MES008-FE-BDK",4,30)
             # 

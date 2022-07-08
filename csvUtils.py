@@ -21,6 +21,7 @@ class csvUtils:
                     'shippingCountry':row["Shipping Country"],
                     'shippingAmount':row["Shipping"],
                     'discount':row["Discount Amount"],
+                    'method':row["Payment Method"],
                     'lineItems':[{
                         'sku':row["Lineitem sku"],
                         'price':row["Lineitem price"],
@@ -46,6 +47,7 @@ class csvUtils:
                     'shippingCountry':row["Shipping Country"],
                     'shippingAmount':row["Shipping"],
                     'discount':row["Discount Amount"],
+                    'method':row["Payment Method"],
                     'lineItems':[{
                         'sku':row["Lineitem sku"],
                         'price':row["Lineitem price"],
