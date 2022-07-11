@@ -1,12 +1,16 @@
 import json
+import math
 import time
 import traceback
-from pytz import country_names
+from dis import dis
 
+from pytz import country_names
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
 
 from WebDriver import EnviromentSetUp
 
@@ -78,7 +82,7 @@ class fufillOrders(EnviromentSetUp):
 
             if(method == "Shopify Payments"):
                 print(country)
-                if(country =="United States"):
+                if(country =="United States" or country =="US"):
                     if(state =="CA"):
                         customer="40010"
                         
@@ -89,22 +93,25 @@ class fufillOrders(EnviromentSetUp):
                 
             elif(method =="PayPal Express Checkout"):
                 print(country)
-                if(country =="United States"):
+                if(country =="United States" or country =="US"):
                     if(state =="CA"):
                         customer="40003"
                         print("CA worked")
                     else:
                         customer="40004"
+                        print("out of state")
                 else:
                     customer="40005"
                     print("INT worked")
 
-
+            time.sleep(0.25)
             customerField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
             customerField.send_keys(str(customer))
+            time.sleep(0.25)
 
             warehouse=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
             warehouse.send_keys('V01')
+            time.sleep(0.25)
 
 
             shipvia=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
@@ -125,33 +132,32 @@ class fufillOrders(EnviromentSetUp):
             editShip=wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
             editShip.click()
             
-        #-----------------------------------------------LOOP
-            nameField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/div/input')))#/html/body/div[7]/div/div[1]/form/div[2]/div/div/input  /html/body/div[10]/div/div[1]/form/div[2]/div/div/input
+            nameField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/div/input')))#/html/body/div[7]/div/div[1]/form/div[2]/div/div/input  /html/body/div[10]/div/div[1]/form/div[2]/div/div/input
             nameField.clear()
             nameField.send_keys(str(name))
 
-            addressField =web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')#//*[@id="address-form-addressform-1657316750821-2"]
+            addressField =web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')#//*[@id="address-form-addressform-1657316750821-2"]
             addressField.clear()
             addressField.send_keys(str(address))
 
-            cityField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')
+            cityField = web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')#/html/body/div[6]
             cityField.clear()
             cityField.send_keys(str(city))
 
-            stateField = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
+            stateField = web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
             stateField.clear()
             stateField.send_keys(str(state))
 
-            zipField=web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
+            zipField=web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
             zipField.clear()
             zipField.send_keys(zip)
             if(country=="US"):
                 country = "United States"
                 
-            countryDrop = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[6]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
+            countryDrop = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
             countryDrop.click()
     
-            countryList = wait.until(EC.element_to_be_clickable((By.XPATH,"/html/body/div[8]/ul")))
+            countryList = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@id="dropdown-list"]/ul')))
 
             for child in countryList.find_elements(By.XPATH,'.//*'):
                 for otherChild in child.find_elements(By.XPATH,'.//*'):               
@@ -163,7 +169,7 @@ class fufillOrders(EnviromentSetUp):
                     continue
                 break
 
-            enterAddress = web.find_element(By.XPATH,'/html/body/div[6]/div/div[1]/form/div[3]/button[2]')
+            enterAddress = web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')
             enterAddress.click()
             
             settings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
@@ -180,7 +186,6 @@ class fufillOrders(EnviromentSetUp):
             traceback.print_exc()
             raise
 
-    
     def addLineItem(sku,quantity,price:float):
         try:
             web=EnviromentSetUp.web
@@ -208,15 +213,20 @@ class fufillOrders(EnviromentSetUp):
             traceback.print_exc()
 
     def finishOrder(shipping:float,discount,zip:int): 
+        """
+        finishes all the added lines and starts doing taxes+comments
+        """
         try:
             web=EnviromentSetUp.web
             wait =WebDriverWait(web,10)
 
 
             data = json.loads(open("cities.json").read())
-
+            state =''
             for i in data:
-                if i['zip_code'] == zip:
+
+                if str(i['zip_code']) == str(zip):
+
                     county =(i['county'])
                     state = (i['state'])
                     city = (i['city'])
@@ -230,7 +240,8 @@ class fufillOrders(EnviromentSetUp):
 
             time.sleep(0.25)
             try:
-                #if (state == "CA"):#make this something else
+                if (state == "CA"):#make this something else
+                    print(state)
                     countryDrop = wait.until(EC.presence_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
                     countryDrop.click()
                     time.sleep(0.5)
@@ -293,12 +304,12 @@ class fufillOrders(EnviromentSetUp):
 
             addShipping = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[1]/td[1]/div/button')))
             addShipping.click()
-            # i am here----------------------------------------------------------------------------------------------------------------------------------
+
             freightDropdown = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[1]/div/div')))
             freightDropdown.click()
 
 
-            freight = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[8]/ul/li[3]/a')))
+            freight = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@id="dropdown-list"]/ul/li[3]/a')))
             freight.click()
             
             freightAmount =wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[2]/input')))
@@ -316,15 +327,32 @@ class fufillOrders(EnviromentSetUp):
             discounts = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[4]')))
             discounts.click()
 
-            discountAmount = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')))
+            discountAmount:WebElement = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')))
             discountAmount.clear()
-            discountAmount.send_keys(discount)
+            dec,whole =math.modf(discount)
+            discountAmount.send_keys(int(whole))
+            discountAmount.send_keys(Keys.TAB)
+            discountAmount.click()#cant put dots?????
+            actions = ActionChains(web)
+            actions.key_down(Keys.CONTROL)
+            actions.send_keys(Keys.ARROW_RIGHT)
+            actions.key_up(Keys.CONTROL)
+            actions.perform()
+            discountAmount.send_keys(Keys.BACKSPACE)
+            discountAmount.send_keys(Keys.BACKSPACE)
+
+            dec *= 100
+            discountAmount.send_keys(int(dec))
+
 
             discountDropdown = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/div/div')
             discountDropdown.click()
 
-            discountType = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[8]/ul/li[1]/a')))
+            discountType = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@id="dropdown-list"]/ul/li[1]/a')))
             discountType.click()
+
+            discountAmount.click()
+
 
             submit =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')
             submit.click()

@@ -1,8 +1,10 @@
+import json
+
 import PySimpleGUI as sg
-from WebDriver import EnviromentSetUp
+
 from csvUtils import csvUtils
 from fufillOrders import fufillOrders
-import json
+from WebDriver import EnviromentSetUp
 
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 
@@ -28,15 +30,29 @@ class Window:
     while True:
         event, values = window.read()
         # csvInput = values["-File-"]
-        csvInput = 'orders_export (4).csv'
+        csvInput = 'orders_export (4)(1).csv'
 
         if event == 'Ok':
+
+
+
+
             orders = csvUtils.readCSV(csvInput)#the dict holding all the orders
+
+
+
             fufillOrders.login("ANR","ANR@0117")
+
+
             for key,value in orders.items():
+
+
                 fufillOrders.setUpOrder(key,value["shippingName"],value["shippingStreet"],value["shippingCity"],value["shippingState"],value["shippingZip"],value["shippingCountry"],value["method"])
+
                 #all the values of an order
+
                 for item in value["lineItems"]:
+                    
                     fufillOrders.addLineItem(item["sku"],item["quantity"],item["price"])
                     #all the values from the line items
                     
@@ -46,7 +62,7 @@ class Window:
             print("out of loop")
             # print(json.dumps(orders,indent=4,sort_keys=True))
             # fufillOrders.login("ANR","ANR@0117")
-            # fufillOrders.setUpOrder("test81","testName","testAddress","Clintonville","WI",54929,"United States","PayPal Express Checkout")
+            # fufillOrders.setUpOrder("test85","testName","testAddress","Clintonville","WI",54929,"United States","PayPal Express Checkout")
             # fufillOrders.addLineItem("F5-MES008-FE-BDK",4,30)
             # fufillOrders.finishOrder(20,2,54929)
             # # 

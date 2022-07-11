@@ -42,7 +42,7 @@ class csvUtils:
                     'shippingName':row["Shipping Name"],
                     'shippingStreet':row["Shipping Street"],
                     'shippingCity':row["Shipping City"],
-                    'shippingZip':row["Shipping Zip"].replace("'",""),
+                    'shippingZip':str(row["Shipping Zip"]).replace("'",""),
                     'shippingState':row["Shipping Province"],
                     'shippingCountry':row["Shipping Country"],
                     'shippingAmount':row["Shipping"],
