@@ -17,64 +17,76 @@ from WebDriver import EnviromentSetUp
 
 class fufillOrders(EnviromentSetUp):
 
-    def login(user,password):
+    def login(user, password):
         try:
             whatever = EnviromentSetUp
             whatever.setUp()
             web = EnviromentSetUp.web
-            #this is the first page that they will be led to, which is some weird login
+            # this is the first page that they will be led to, which is some weird login
             web.get("https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524?favoriteContext=oeet.initiate&LogicalId=lid://infor.sx.1")
-            signInUser=web.find_element(By.XPATH,'//*[@id="userNameInput"]')
+            signInUser = web.find_element(By.XPATH, '//*[@id="userNameInput"]')
             signInUser.send_keys("acumen@val2017")
-            signInPassword=web.find_element(By.XPATH,'//*[@id="passwordInput"]')
+            signInPassword = web.find_element(
+                By.XPATH, '//*[@id="passwordInput"]')
             signInPassword.send_keys('17SHTinfor/')
-            signInSubmit=web.find_element(By.XPATH,'//*[@id="submitButton"]')
+            signInSubmit = web.find_element(
+                By.XPATH, '//*[@id="submitButton"]')
             signInSubmit.click()
-            wait = WebDriverWait(web,10)
+            wait = WebDriverWait(web, 5)
 
-            #https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524
+            # https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524
             # this is the second page that they will be led to, which is the infor loging
-          
-            
-            #checking to see if the document management tab is open cause it needs to be closed
-            documentMng = wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@id="body"]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]')))
-            if ("expanded" in documentMng.get_attribute("class")):
-                close = web.find_element(By.XPATH,'/html/body/div[2]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]/button')
-                close.click()
-                print("i closed it")
-            elif("collapsed" in documentMng.get_attribute("class")):
-                print("it is closed")
 
-            #entering the frame inside the infor website which is where all the action is
-            wait.until(EC.frame_to_be_available_and_switch_to_it((By.NAME,"sxeweb_d7de089b-7e09-4476-a5f5-80697edc7524")))#class =m-app-frame
-            inforUser = wait.until(EC.visibility_of_element_located((By.XPATH,'//*[@id="signin-userid"]')))
+            # checking to see if the document management tab is open cause it needs to be closed
+            documentMng = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '//*[@id="body"]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]')))
+            if ("expanded" in documentMng.get_attribute("class")):
+                close = web.find_element(
+                    By.XPATH, '/html/body/div[2]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]/button')
+                close.click()
+
+            # elif("collapsed" in documentMng.get_attribute("class")):
+
+            # entering the frame inside the infor website which is where all the action is
+            wait.until(EC.frame_to_be_available_and_switch_to_it(
+                (By.NAME, "sxeweb_d7de089b-7e09-4476-a5f5-80697edc7524")))  # class =m-app-frame
+            inforUser = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '//*[@id="signin-userid"]')))
             inforUser.send_keys(str(user))
 
-            inforPassword = web.find_element(By.XPATH,'//*[@id="signin-password"]')
-            inforCompany = web.find_element(By.XPATH,'//*[@id="signin-company"]')
+            inforPassword = web.find_element(
+                By.XPATH, '//*[@id="signin-password"]')
+            inforCompany = web.find_element(
+                By.XPATH, '//*[@id="signin-company"]')
 
             inforPassword.send_keys(str(password))
             inforCompany.send_keys("40")
 
-            inforSubmit=web.find_element(By.XPATH,'//*[@id="sign-in-view"]/section/form/button')
+            inforSubmit = web.find_element(
+                By.XPATH, '//*[@id="sign-in-view"]/section/form/button')
             inforSubmit.click()
-            inforOp = wait.until(EC.visibility_of_element_located((By.CLASS_NAME,'btn-modal-primary')))
+            inforOp = wait.until(EC.visibility_of_element_located(
+                (By.CLASS_NAME, 'btn-modal-primary')))
             inforOp.click()
+
+            customerField = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
+
             print("logged in")
-            
+
         except Exception:
-            print("Wasn't able to login")
-            traceback.print_exc()
-           
+            raise
+
     def closeWeb():
         EnviromentSetUp.closeWeb()
-   #AV == shopify vs paypal which changes the customer number thign ex.40010
-    def setUpOrder(po,name,address,city,state,zip,country,method):     
+   # AV == shopify vs paypal which changes the customer number thign ex.40010
+
+    def setUpOrder(po, name, address, city, state, zip, country, method):
         try:
 
-         #just gets ready to actually start looping through orders
+         # just gets ready to actually start looping through orders
             web = EnviromentSetUp.web
-            wait = WebDriverWait(web,10)
+            wait = WebDriverWait(web, 10)
             # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
 
             data = json.loads(open("cities.json").read())
@@ -82,39 +94,41 @@ class fufillOrders(EnviromentSetUp):
 
             if(method == "Shopify Payments"):
                 print(country)
-                if(country =="United States" or country =="US"):
-                    if(state =="CA"):
-                        customer="40010"
-                        
+                if(country == "United States" or country == "US"):
+                    if(state == "CA"):
+                        customer = "40010"
+
                     else:
-                        customer="40011"
+                        customer = "40011"
                 else:
-                    customer="40012"
-                
-            elif(method =="PayPal Express Checkout"):
+                    customer = "40012"
+
+            elif(method == "PayPal Express Checkout"):
                 print(country)
-                if(country =="United States" or country =="US"):
-                    if(state =="CA"):
-                        customer="40003"
+                if(country == "United States" or country == "US"):
+                    if(state == "CA"):
+                        customer = "40003"
                         print("CA worked")
                     else:
-                        customer="40004"
+                        customer = "40004"
                         print("out of state")
                 else:
-                    customer="40005"
+                    customer = "40005"
                     print("INT worked")
 
             time.sleep(0.25)
-            customerField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
+            customerField = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
             customerField.send_keys(str(customer))
             time.sleep(0.25)
 
-            warehouse=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
+            warehouse = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
             warehouse.send_keys('V01')
             time.sleep(0.25)
 
-
-            shipvia=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
+            shipvia = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
             # print(shipvia.get_attribute("value"))
             # print("text should be ^")
             time.sleep(.5)
@@ -122,46 +136,59 @@ class fufillOrders(EnviromentSetUp):
             shipvia.send_keys('UG')
 
             time.sleep(.5)
-            orderID=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
-            orderID.send_keys(str(po))#--------------------------------------------------------------ADD ONE
+            orderID = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
+            # --------------------------------------------------------------ADD ONE
+            orderID.send_keys(str(po))
 
-            initNext=web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
+            initNext = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
             initNext.click()
 
             # edit ship to address| three dot settings line entry quick| quantity| part number | add
-            editShip=wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
+            editShip = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
             editShip.click()
-            
-            nameField = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/div/input')))#/html/body/div[7]/div/div[1]/form/div[2]/div/div/input  /html/body/div[10]/div/div[1]/form/div[2]/div/div/input
+
+            # /html/body/div[7]/div/div[1]/form/div[2]/div/div/input  /html/body/div[10]/div/div[1]/form/div[2]/div/div/input
+            nameField = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/div/input')))
             nameField.clear()
             nameField.send_keys(str(name))
 
-            addressField =web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')#//*[@id="address-form-addressform-1657316750821-2"]
+            # //*[@id="address-form-addressform-1657316750821-2"]
+            addressField = web.find_element(
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')
             addressField.clear()
             addressField.send_keys(str(address))
 
-            cityField = web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')#/html/body/div[6]
+            cityField = web.find_element(
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')  # /html/body/div[6]
             cityField.clear()
             cityField.send_keys(str(city))
 
-            stateField = web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
+            stateField = web.find_element(
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
             stateField.clear()
             stateField.send_keys(str(state))
 
-            zipField=web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
+            zipField = web.find_element(
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
             zipField.clear()
             zipField.send_keys(zip)
-            if(country=="US"):
+            if(country == "US"):
                 country = "United States"
-                
-            countryDrop = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
-            countryDrop.click()
-    
-            countryList = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@id="dropdown-list"]/ul')))
 
-            for child in countryList.find_elements(By.XPATH,'.//*'):
-                for otherChild in child.find_elements(By.XPATH,'.//*'):               
-                    
+            countryDrop = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
+            countryDrop.click()
+
+            countryList = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
+
+            for child in countryList.find_elements(By.XPATH, './/*'):
+                for otherChild in child.find_elements(By.XPATH, './/*'):
+
                     if(otherChild.get_attribute("innerHTML") == country):
                         otherChild.click()
                         break
@@ -169,94 +196,107 @@ class fufillOrders(EnviromentSetUp):
                     continue
                 break
 
-            enterAddress = web.find_element(By.XPATH,'/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')
+            enterAddress = web.find_element(
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')
             enterAddress.click()
-            
-            settings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
+
+            settings = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
             settings.click()
 
-            lineEntry = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
+            lineEntry = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
             lineEntry.click()
 
-            quickLine = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
+            quickLine = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
             quickLine.click()
-        
+
         except Exception:
             print("could not setup order")
             traceback.print_exc()
             raise
 
-    def addLineItem(sku,quantity,price:float):
+    def addLineItem(sku, quantity, price: float):
         try:
-            web=EnviromentSetUp.web
-            wait = WebDriverWait(web,10)
+            web = EnviromentSetUp.web
+            wait = WebDriverWait(web, 10)
 
-            product = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')))
+            product = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')))
             product.send_keys(str(sku))
 
-            quantityField = web.find_element(By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')
+            quantityField = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')
             quantityField.click()
-            quantityField.clear()    
+            quantityField.clear()
             quantityField.send_keys(quantity)
 
-            priceField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')
+            priceField = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')
             priceField.clear()
             time.sleep(0.5)
             priceField.click()
             priceField.send_keys(price)
 
-            add =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
+            add = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
             add.click()
-        
+
         except Exception:
             print("wasn't able to add a line item")
             traceback.print_exc()
 
-    def finishOrder(shipping:float,discount,zip:int): 
+    def finishOrder(shipping: float, discount, zip: int):
         """
         finishes all the added lines and starts doing taxes+comments
         """
         try:
-            web=EnviromentSetUp.web
-            wait =WebDriverWait(web,10)
-
+            web = EnviromentSetUp.web
+            wait = WebDriverWait(web, 10)
 
             data = json.loads(open("cities.json").read())
-            state =''
+            state = ''
             for i in data:
 
                 if str(i['zip_code']) == str(zip):
 
-                    county =(i['county'])
+                    county = (i['county'])
                     state = (i['state'])
                     city = (i['city'])
                     break
 
-            addLines = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
+            addLines = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
             addLines.click()
 
-            taxButton = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3]')))
+            taxButton = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3]')))
             taxButton.click()
 
             time.sleep(0.25)
             try:
-                if (state == "CA"):#make this something else
+                if (state == "CA"):  # make this something else
                     print(state)
-                    countryDrop = wait.until(EC.presence_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
+                    countryDrop = wait.until(EC.presence_of_element_located(
+                        (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
                     countryDrop.click()
                     time.sleep(0.5)
-                    countryDrop=web.find_element(By.XPATH,'/html/body/div[8]/span')
+                    countryDrop = web.find_element(
+                        By.XPATH, '/html/body/div[8]/span')
                     countryDrop.click()
-                    countyField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div')
+                    countyField = web.find_element(
+                        By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div')
                     countyField.click()
                     time.sleep(0.25)
                     county = str(county).upper()
-                    countyList = web.find_element(By.XPATH,'/html/body/div[8]/ul')
+                    countyList = web.find_element(
+                        By.XPATH, '/html/body/div[8]/ul')
 
-                    for child in countyList.find_elements(By.XPATH,'.//*'):
-                        for otherChild in child.find_elements(By.XPATH,'.//*'):               
-                            
-                            if(otherChild.get_attribute("innerHTML") == county.replace(" ","")):
+                    for child in countyList.find_elements(By.XPATH, './/*'):
+                        for otherChild in child.find_elements(By.XPATH, './/*'):
+
+                            if(otherChild.get_attribute("innerHTML") == county.replace(" ", "")):
                                 otherChild.click()
                                 break
                             elif(otherChild.get_attribute("innerHTML") == county):
@@ -266,23 +306,25 @@ class fufillOrders(EnviromentSetUp):
                             continue
                         break
 
-                    cityField = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[3]/div/div')
+                    cityField = web.find_element(
+                        By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[3]/div/div')
                     cityField.click()
                     time.sleep(0.25)
                     city = str(city).upper()
-                    if(len(city)>12):
+                    if(len(city) > 12):
                         betterCity = city[0:12]
-                    county = county.replace(" ","")
-                    betterCounty =county[0:4]
-                    betterCity+="-"+betterCounty
-                    cityList = web.find_element(By.XPATH,'/html/body/div[8]/ul')
+                    county = county.replace(" ", "")
+                    betterCounty = county[0:4]
+                    betterCity += "-"+betterCounty
+                    cityList = web.find_element(
+                        By.XPATH, '/html/body/div[8]/ul')
 
-                    for child in cityList.find_elements(By.XPATH,'.//*'):
-                        for otherChild in child.find_elements(By.XPATH,'.//*'):
+                    for child in cityList.find_elements(By.XPATH, './/*'):
+                        for otherChild in child.find_elements(By.XPATH, './/*'):
                             print(otherChild.get_attribute("innerHTML"))
-                            #SANTA FE SPR-LOSA first 12 + "-LOSA"
-                            #RANCHO DOMIN-LOSA    HACIENDA HEI-LOSA
-                            if(otherChild.get_attribute("innerHTML") == betterCity.replace(" ","")):
+                            # SANTA FE SPR-LOSA first 12 + "-LOSA"
+                            # RANCHO DOMIN-LOSA    HACIENDA HEI-LOSA
+                            if(otherChild.get_attribute("innerHTML") == betterCity.replace(" ", "")):
                                 otherChild.click()
                                 break
                             elif(otherChild.get_attribute("innerHTML") == betterCity):
@@ -291,48 +333,55 @@ class fufillOrders(EnviromentSetUp):
                         else:
                             continue
                         break
-                    
+
             except UnboundLocalError:
                 print("not defined")
-                 
 
-            recalculate = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
+            recalculate = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             recalculate.click()
             time.sleep(1)
-            addons = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
+            addons = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
             addons.click()
 
-            addShipping = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[1]/td[1]/div/button')))
+            addShipping = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[1]/td[1]/div/button')))
             addShipping.click()
 
-            freightDropdown = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[1]/div/div')))
+            freightDropdown = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[1]/div/div')))
             freightDropdown.click()
 
-
-            freight = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@id="dropdown-list"]/ul/li[3]/a')))
+            freight = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul/li[3]/a')))
             freight.click()
-            
-            freightAmount =wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[2]/input')))
+
+            freightAmount = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[2]/input')))
             freightAmount.clear()
             time.sleep(0.5)
             freightAmount.send_keys(shipping)
 
-            finishFreight = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[2]/div[2]/button[1]')
+            finishFreight = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[2]/div[2]/button[1]')
             finishFreight.click()
-            
 
-            goBack = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[1]/div/button')))
+            goBack = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[1]/div/button')))
             goBack.click()
 
-            discounts = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[4]')))
+            discounts = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[4]')))
             discounts.click()
 
-            discountAmount:WebElement = wait.until(EC.visibility_of_element_located((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')))
+            discountAmount: WebElement = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')))
             discountAmount.clear()
-            dec,whole =math.modf(discount)
+            dec, whole = math.modf(discount)
             discountAmount.send_keys(int(whole))
             discountAmount.send_keys(Keys.TAB)
-            discountAmount.click()#cant put dots?????
+            discountAmount.click()  # cant put dots?????
             actions = ActionChains(web)
             actions.key_down(Keys.CONTROL)
             actions.send_keys(Keys.ARROW_RIGHT)
@@ -344,22 +393,24 @@ class fufillOrders(EnviromentSetUp):
             dec *= 100
             discountAmount.send_keys(int(dec))
 
-
-            discountDropdown = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/div/div')
+            discountDropdown = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/div/div')
             discountDropdown.click()
 
-            discountType = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[@id="dropdown-list"]/ul/li[1]/a')))
+            discountType = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul/li[1]/a')))
             discountType.click()
 
             discountAmount.click()
 
-
-            submit =web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')
+            submit = web.find_element(
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')
             submit.click()
 
-            finish = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')))
+            finish = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')))
             finish.click()
-        
+
         except Exception:
             print("Wasn't able to finish order")
             traceback.print_exc()

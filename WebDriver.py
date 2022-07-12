@@ -10,6 +10,5 @@ class EnviromentSetUp(webdriver.Chrome):
 
     @classmethod
     def closeWeb(cls):
-        if(cls.web!=None):
-            cls.web.close()
+        if(cls.web==None):
             cls.web.quit()
