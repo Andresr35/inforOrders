@@ -1,10 +1,8 @@
-import json
 
 import PySimpleGUI as sg
 
 from csvUtils import csvUtils
 from fufillOrders import fufillOrders
-from WebDriver import EnviromentSetUp
 
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 
@@ -51,12 +49,20 @@ class Window:
                 window['-Update-'].update("Could not login. Try again!")
                 window.force_focus()
                 continue
+            #TODO: Print the failed and finished orders in the GUI
+            finishedOrders = []
+            failedOrders = []
 
             for key, value in orders.items():
 
-                fufillOrders.setUpOrder(key, value["shippingName"], value["shippingStreet"], value["shippingCity"],
-                                        value["shippingState"], value["shippingZip"], value["shippingCountry"], value["method"])
-
+                try:
+                    #FIXME: If an order is setup already but fails and you try to login again, infor will send you to the order that was not finished.
+                    #TODO: 
+                    fufillOrders.setUpOrder(key, value["shippingName"], value["shippingStreet"], value["shippingCity"],
+                                            value["shippingState"], value["shippingZip"], value["shippingCountry"], value["method"])
+                except Exception:
+                    print("could not setup order")
+                    failedOrders.append[key]
                 # all the values of an order
 
                 for item in value["lineItems"]:
@@ -65,8 +71,12 @@ class Window:
                         item["sku"], item["quantity"], item["price"])
                     # all the values from the line items
 
-                fufillOrders.finishOrder(
-                    value["shippingAmount"], value["discount"], value["shippingZip"])
+                try:
+                    fufillOrders.finishOrder(
+                        value["shippingAmount"], value["discount"], value["shippingZip"])
+                    finishedOrders.append(key)
+                except Exception:
+                    print("could not finish order")
 
             print("out of loop")
             # print(json.dumps(orders,indent=4,sort_keys=True))

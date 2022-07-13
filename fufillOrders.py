@@ -2,22 +2,24 @@ import json
 import math
 import time
 import traceback
-from dis import dis
 
-from pytz import country_names
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import  WebDriverWait
 
 from WebDriver import EnviromentSetUp
 
-
+#fufillOrders grabs the login info for a user 
 class fufillOrders(EnviromentSetUp):
+    """
+    methods:
 
-    def login(user, password):
+    login logs you in
+    """
+
+    def login(user, password) -> None:
         try:
             whatever = EnviromentSetUp
             whatever.setUp()
@@ -77,11 +79,18 @@ class fufillOrders(EnviromentSetUp):
         except Exception:
             raise
 
-    def closeWeb():
+    def closeWeb() -> None:
         EnviromentSetUp.closeWeb()
    # AV == shopify vs paypal which changes the customer number thign ex.40010
 
-    def setUpOrder(po, name, address, city, state, zip, country, method):
+    def setUpOrder(po, name, address, city, state, zip, country, method) ->None:
+        '''
+        :Args:
+            - po - PO number from shopify of the customer
+            - name - shipping name
+            - address,city,state,zip and country - shipping address
+            - method - payment method used in shopify        
+        '''
         try:
 
          # just gets ready to actually start looping through orders
@@ -217,7 +226,7 @@ class fufillOrders(EnviromentSetUp):
             traceback.print_exc()
             raise
 
-    def addLineItem(sku, quantity, price: float):
+    def addLineItem(sku, quantity, price: float) -> None:
         try:
             web = EnviromentSetUp.web
             wait = WebDriverWait(web, 10)
@@ -247,7 +256,7 @@ class fufillOrders(EnviromentSetUp):
             print("wasn't able to add a line item")
             traceback.print_exc()
 
-    def finishOrder(shipping: float, discount, zip: int):
+    def finishOrder(shipping: float, discount, zip: int) -> None:
         """
         finishes all the added lines and starts doing taxes+comments
         """
