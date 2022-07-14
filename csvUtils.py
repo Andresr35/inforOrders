@@ -1,9 +1,19 @@
 import pandas as pd
 
 class csvUtils:
+    """creates an object from shopify csv 
+    """
 
     
     def readCSV(csvInput):
+        """Reads shpify csv to give back an object to allow for easier looping through orders and line items
+
+        Args:
+            csvInput (filePath): path to where csv file is
+
+        Returns:
+            dict: dictionary holding orders
+        """
 
         rawCSV =pd.read_csv(csvInput)
         newDict = {}

@@ -9,8 +9,14 @@ PATH = "C:\Program Files (x86)\chromedriver.exe"
 
 # andresisabozo
 class Window:
-
+    """This starts the GUI and uses selenium to import orders
+    """
     def setUpGui():
+        """This sets up the main GUI with themes and stuff
+
+        Returns:
+            window: selenium window
+        """
 
         # Add a touch of color DarkBlue3 or Default
         sg.theme('DefaultNoMoreNagging')
@@ -25,7 +31,10 @@ class Window:
             [sg.Push(), sg.Text('Import the CSV file from Shopify'), sg.Push()],
             [sg.Push(), sg.Input(enable_events=True, size=(18, 1)),
              sg.FileBrowse(key="-File-"), sg.Push()],
-            [sg.Push(), sg.Button('Ok'), sg.Button('Cancel')]]
+            [sg.Push(), sg.Button('Ok'), sg.Button('Cancel')],
+            [sg.Push(), sg.Text('', key="-Failed-", text_color="red"), sg.Push()],
+            [sg.Push(), sg.Text('', key="-Finished-", text_color="green"), sg.Push()],
+        ]
 
         # Create the Window
         window = sg.Window('Order Automation', layout)
@@ -34,14 +43,15 @@ class Window:
     window = setUpGui()
 
     while True:
+
         event, values = window.read()
+
         csvInput = values["-File-"]
-        # csvInput = 'orders_export (4)(1).csv'KC
 
         if event == 'Ok':
 
-            # the dict holding all the orders
             orders = csvUtils.readCSV(csvInput)
+            # NOTE: Tries to login and if not then brings the window in focus to try again
             try:
                 fufillOrders.login(values["-Username-"], values["-Password-"])
             except Exception:
@@ -49,51 +59,78 @@ class Window:
                 window['-Update-'].update("Could not login. Try again!")
                 window.force_focus()
                 continue
-            #TODO: Print the failed and finished orders in the GUI
+
             finishedOrders = []
             failedOrders = []
 
+            # For loop to go through each order. Must be logged in first.
             for key, value in orders.items():
-
+                
+                # this will try to set up the order
                 try:
-                    #FIXME: If an order is setup already but fails and you try to login again, infor will send you to the order that was not finished.
-                    #TODO: 
-                    fufillOrders.setUpOrder(key, value["shippingName"], value["shippingStreet"], value["shippingCity"],
-                                            value["shippingState"], value["shippingZip"], value["shippingCountry"], value["method"])
+                    fufillOrders.setUpOrder(key, value["shippingState"],value["shippingCountry"], value["method"])
+                #will only login, wont cancel order since it doesnt need to then continue
                 except Exception:
                     print("could not setup order")
-                    failedOrders.append[key]
-                # all the values of an order
+                    fufillOrders.login(values["-Username-"], values["-Password-"])
+                    continue
 
-                for item in value["lineItems"]:
-
-                    fufillOrders.addLineItem(
-                        item["sku"], item["quantity"], item["price"])
-                    # all the values from the line items
-
+                #will try to do the rest of the order, will need to cancel order if fails
                 try:
-                    fufillOrders.finishOrder(
-                        value["shippingAmount"], value["discount"], value["shippingZip"])
+                    #edit shipping stuff
+                    try:
+                        fufillOrders.editShipping(value["shippingName"], value["shippingStreet"], value["shippingCity"],
+                                                value["shippingState"], value["shippingZip"],value["shippingCountry"])
+                    except Exception:
+                        print("could not setup order")
+                        raise
+
+                    # Tries to add line items
+                    try:
+                        for item in value["lineItems"]:
+
+                            fufillOrders.addLineItem(
+                                # all the values from the line items
+                                item["sku"], item["quantity"], item["price"])
+                    except Exception:
+                        print("could not add line items")
+                        raise
+
+                    # Finishes up the order by doing taxes and shipping
+                    try:
+                        fufillOrders.finishOrder(
+                            value["shippingAmount"], value["discount"], value["shippingZip"])
+                        finishedOrders.append(key)
+                    except Exception:
+                        print("could not finish order")
+                        raise
+
+                    # finished order and add to array
                     finishedOrders.append(key)
+
+                # Will relogin and cancel previous order then continue
                 except Exception:
-                    print("could not finish order")
+                    print("could not do order " + key)
+                    failedOrders.append(key)
+                    fufillOrders.login(
+                        values["-Username-"], values["-Password-"])
+                    fufillOrders.cancelFailedOrder()
+                    continue
 
-            print("out of loop")
-            # print(json.dumps(orders,indent=4,sort_keys=True))
-            # fufillOrders.login("ANR","ANR@0117")
-            # fufillOrders.setUpOrder("test85","testName","testAddress","Clintonville","WI",54929,"United States","PayPal Express Checkout")
-            # fufillOrders.addLineItem("F5-MES008-FE-BDK",4,30)
-            # fufillOrders.finishOrder(20,2,54929)
-            # #
-            #
-            # fufillOrders.addLineItem("F5-MES008-FE-BDK",4,30)
-            #
+            # prints failed and finished orders to gui
+            window['-Failed-'].update("Failed orders: "+str(failedOrders))
+            window['-Finished-'].update("Finished orders: " +
+                                        str(finishedOrders))
+            window.force_focus()
 
-        # if event == sg.WIN_CLOSED or event == 'Cancel':  # if user closes window or clicks cancel
+            fufillOrders.closeWeb()
+            print("finished")
+
         if event in (sg.WIN_CLOSED, 'Cancel'):  # if user closes window or clicks cancel
             try:
                 fufillOrders.closeWeb()
             except Exception:
                 print("not closed properly..doesn't matter")
             break
+
     window.close()

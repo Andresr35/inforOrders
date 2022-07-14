@@ -20,6 +20,12 @@ class fufillOrders(EnviromentSetUp):
     """
 
     def login(user, password) -> None:
+        """starts the web selenium server and logs into infor on company 40. Ends up taking you to order entry page
+
+        Args:
+            user (str): username for infor
+            password (str): password for infor
+        """
         try:
             whatever = EnviromentSetUp
             whatever.setUp()
@@ -73,6 +79,7 @@ class fufillOrders(EnviromentSetUp):
 
             customerField = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
+                            #/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input
 
             print("logged in")
 
@@ -83,22 +90,21 @@ class fufillOrders(EnviromentSetUp):
         EnviromentSetUp.closeWeb()
    # AV == shopify vs paypal which changes the customer number thign ex.40010
 
-    def setUpOrder(po, name, address, city, state, zip, country, method) ->None:
+    def setUpOrder(po,  state,  country, method) ->None:
         '''
         :Args:
             - po - PO number from shopify of the customer
-            - name - shipping name
-            - address,city,state,zip and country - shipping address
+            - state - shipping state
+            - country - shipping country
             - method - payment method used in shopify        
         '''
         try:
 
          # just gets ready to actually start looping through orders
             web = EnviromentSetUp.web
-            wait = WebDriverWait(web, 10)
+            wait = WebDriverWait(web, 5)
             # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
 
-            data = json.loads(open("cities.json").read())
             print(state)
 
             if(method == "Shopify Payments"):
@@ -138,22 +144,40 @@ class fufillOrders(EnviromentSetUp):
 
             shipvia = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
-            # print(shipvia.get_attribute("value"))
-            # print("text should be ^")
+
             time.sleep(.5)
             shipvia.clear()
             shipvia.send_keys('UG')
-
+          
             time.sleep(.5)
             orderID = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
-            # --------------------------------------------------------------ADD ONE
             orderID.send_keys(str(po))
 
             initNext = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
             initNext.click()
+        except Exception:
+            print("could not setup order")
+            traceback.print_exc()
+            raise
 
+    def editShipping(name, address, city,state,zip,country) ->None:
+        """edits the shipping address in infor and gets ready to start adding line items.
+
+        Args:
+            name (str): shipping name
+            address (str): shipping address
+            city (str): shipping city
+            state (str): state abbreviation
+            zip (int): shipping zip
+            country (str): shipping country
+        """
+
+        web = EnviromentSetUp.web
+        wait = WebDriverWait(web, 5)
+        try:        
+        #set up another function here?
             # edit ship to address| three dot settings line entry quick| quantity| part number | add
             editShip = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
@@ -184,7 +208,7 @@ class fufillOrders(EnviromentSetUp):
             zipField = web.find_element(
                 By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
             zipField.clear()
-            zipField.send_keys(zip)
+            zipField.send_keys(str(zip))
             if(country == "US"):
                 country = "United States"
 
@@ -192,7 +216,7 @@ class fufillOrders(EnviromentSetUp):
                 (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
             countryDrop.click()
 
-            countryList = wait.until(EC.element_to_be_clickable(
+            countryList:WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
 
             for child in countryList.find_elements(By.XPATH, './/*'):
@@ -220,9 +244,9 @@ class fufillOrders(EnviromentSetUp):
             quickLine = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
             quickLine.click()
-
+            
         except Exception:
-            print("could not setup order")
+            print("could not edit shipping")
             traceback.print_exc()
             raise
 
@@ -257,8 +281,12 @@ class fufillOrders(EnviromentSetUp):
             traceback.print_exc()
 
     def finishOrder(shipping: float, discount, zip: int) -> None:
-        """
-        finishes all the added lines and starts doing taxes+comments
+        """does taxes and shipping, then gets ready to do next order entry
+
+        Args:
+            shipping (float): shipping amount
+            discount (float): discount amount
+            zip (int): zip code
         """
         try:
             web = EnviromentSetUp.web
@@ -425,3 +453,19 @@ class fufillOrders(EnviromentSetUp):
             traceback.print_exc()
         # customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
         # customerSettings.click()
+    def cancelFailedOrder():
+        """cancels an order when a past cancled order goes wrong.
+        """
+        web = EnviromentSetUp.web
+        wait = WebDriverWait(web, 5)
+        try:
+            time.sleep(4)
+            cancel:WebElement = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
+            cancel.click()
+            create:WebElement = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
+            create.click()
+            print("cancelllingg")
+        except Exception:
+            traceback.print_exc()
+            print("could not cancel order, will have to abort all")
+            raise
