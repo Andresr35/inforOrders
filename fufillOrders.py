@@ -87,7 +87,11 @@ class fufillOrders(EnviromentSetUp):
             raise
 
     def closeWeb() -> None:
-        EnviromentSetUp.closeWeb()
+        """uses web.close() should work if there is still a web that is open
+        """
+        web = EnviromentSetUp.web
+        web.close()
+        
    # AV == shopify vs paypal which changes the customer number thign ex.40010
 
     def setUpOrder(po,  state,  country, method) ->None:
@@ -105,7 +109,6 @@ class fufillOrders(EnviromentSetUp):
             wait = WebDriverWait(web, 5)
             # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
 
-            print(state)
 
             if(method == "Shopify Payments"):
                 print(country)
@@ -233,9 +236,9 @@ class fufillOrders(EnviromentSetUp):
                 By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')
             enterAddress.click()
 
-            settings = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
-            settings.click()
+            # settings = web.find_element(
+            #     By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
+            # settings.click()
 
             lineEntry = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
@@ -307,14 +310,13 @@ class fufillOrders(EnviromentSetUp):
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
             addLines.click()
 
-            taxButton = wait.until(EC.visibility_of_element_located(
+            taxButton = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3]')))
             taxButton.click()
 
             time.sleep(0.25)
             try:
                 if (state == "CA"):  # make this something else
-                    print(state)
                     countryDrop = wait.until(EC.presence_of_element_located(
                         (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
                     countryDrop.click()
@@ -374,7 +376,7 @@ class fufillOrders(EnviromentSetUp):
             except UnboundLocalError:
                 print("not defined")
 
-            recalculate = wait.until(EC.visibility_of_element_located(
+            recalculate = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             recalculate.click()
             time.sleep(1)
@@ -451,6 +453,7 @@ class fufillOrders(EnviromentSetUp):
         except Exception:
             print("Wasn't able to finish order")
             traceback.print_exc()
+            raise
         # customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
         # customerSettings.click()
     def cancelFailedOrder():
