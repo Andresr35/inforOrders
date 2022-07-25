@@ -15,6 +15,7 @@ def setUpGui() -> sg.Window:
         window: selenium window
     """
 
+
     # Add a touch of color DarkBlue3 or Default
     sg.theme('DefaultNoMoreNagging')
     # All the stuff inside your window.

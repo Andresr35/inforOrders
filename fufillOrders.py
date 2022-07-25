@@ -7,11 +7,13 @@ from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import  WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
 
 from WebDriver import EnviromentSetUp
 
-#fufillOrders grabs the login info for a user 
+# fufillOrders grabs the login info for a user
+
+
 class fufillOrders(EnviromentSetUp):
     """
     methods:
@@ -40,7 +42,7 @@ class fufillOrders(EnviromentSetUp):
             signInSubmit = web.find_element(
                 By.XPATH, '//*[@id="submitButton"]')
             signInSubmit.click()
-            wait = WebDriverWait(web, 5)
+            wait = WebDriverWait(web, 10)
 
             # https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524
             # this is the second page that they will be led to, which is the infor loging
@@ -79,7 +81,7 @@ class fufillOrders(EnviromentSetUp):
 
             customerField = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
-                            #/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input
+            # /html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input
 
             print("logged in")
 
@@ -91,10 +93,10 @@ class fufillOrders(EnviromentSetUp):
         """
         web = EnviromentSetUp.web
         web.close()
-        
+
    # AV == shopify vs paypal which changes the customer number thign ex.40010
 
-    def setUpOrder(po,  state,  country, method) ->None:
+    def setUpOrder(po,  state,  country, method) -> None:
         '''
         :Args:
             - po - PO number from shopify of the customer
@@ -106,9 +108,8 @@ class fufillOrders(EnviromentSetUp):
 
          # just gets ready to actually start looping through orders
             web = EnviromentSetUp.web
-            wait = WebDriverWait(web, 5)
+            wait = WebDriverWait(web, 10)
             # 2124 in customer |warehouse v01 | customer po # = order number| ship via prepaid something | next
-
 
             if(method == "Shopify Payments"):
                 print(country)
@@ -151,7 +152,7 @@ class fufillOrders(EnviromentSetUp):
             time.sleep(.5)
             shipvia.clear()
             shipvia.send_keys('UG')
-          
+
             time.sleep(.5)
             orderID = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
@@ -165,7 +166,7 @@ class fufillOrders(EnviromentSetUp):
             traceback.print_exc()
             raise
 
-    def editShipping(name, address, city,state,zip,country) ->None:
+    def editShipping(name, address, city, state, zip, country) -> None:
         """edits the shipping address in infor and gets ready to start adding line items.
 
         Args:
@@ -178,9 +179,9 @@ class fufillOrders(EnviromentSetUp):
         """
 
         web = EnviromentSetUp.web
-        wait = WebDriverWait(web, 5)
-        try:        
-        #set up another function here?
+        wait = WebDriverWait(web, 10)
+        try:
+            # set up another function here?
             # edit ship to address| three dot settings line entry quick| quantity| part number | add
             editShip = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
@@ -219,7 +220,7 @@ class fufillOrders(EnviromentSetUp):
                 (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
             countryDrop.click()
 
-            countryList:WebElement = wait.until(EC.element_to_be_clickable(
+            countryList: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
 
             for child in countryList.find_elements(By.XPATH, './/*'):
@@ -247,7 +248,7 @@ class fufillOrders(EnviromentSetUp):
             quickLine = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
             quickLine.click()
-            
+
         except Exception:
             print("could not edit shipping")
             traceback.print_exc()
@@ -456,16 +457,19 @@ class fufillOrders(EnviromentSetUp):
             raise
         # customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
         # customerSettings.click()
+
     def cancelFailedOrder():
         """cancels an order when a past cancled order goes wrong.
         """
         web = EnviromentSetUp.web
-        wait = WebDriverWait(web, 5)
+        wait = WebDriverWait(web, 10)
         try:
             time.sleep(4)
-            cancel:WebElement = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
+            cancel: WebElement = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
             cancel.click()
-            create:WebElement = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
+            create: WebElement = wait.until(EC.element_to_be_clickable(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             create.click()
             print("cancelllingg")
         except Exception:
