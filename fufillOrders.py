@@ -2,6 +2,7 @@ import json
 import math
 import time
 import traceback
+from numpy import short
 
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -317,9 +318,10 @@ class fufillOrders(EnviromentSetUp):
 
             time.sleep(0.25)
             try:
-                if (state == "CA"):  # make this something else
-                    countryDrop = wait.until(EC.presence_of_element_located(
+                if (state == "CA"): #countrydrop = ???
+                    countryDrop:WebElement = wait.until(EC.element_to_be_clickable(
                         (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
+                        #           /html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div
                     countryDrop.click()
                     time.sleep(0.5)
                     countryDrop = web.find_element(
@@ -330,16 +332,23 @@ class fufillOrders(EnviromentSetUp):
                     countyField.click()
                     time.sleep(0.25)
                     county = str(county).upper()
+                    #TODO: county needs to be 12 
+                    #SAN BERNARDI
+                    #LOS ANGELES
+                    #SAN LUIS OBI
+                    if(len(county) > 12):
+                        shortCounty = county[0:12]
+
                     countyList = web.find_element(
                         By.XPATH, '/html/body/div[8]/ul')
 
                     for child in countyList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
 
-                            if(otherChild.get_attribute("innerHTML") == county.replace(" ", "")):
+                            if(otherChild.get_attribute("innerHTML") == shortCounty.replace(" ", "")):
                                 otherChild.click()
                                 break
-                            elif(otherChild.get_attribute("innerHTML") == county):
+                            elif(otherChild.get_attribute("innerHTML") == shortCounty):
                                 otherChild.click()
                                 break
                         else:
@@ -353,6 +362,8 @@ class fufillOrders(EnviromentSetUp):
                     city = str(city).upper()
                     if(len(city) > 12):
                         betterCity = city[0:12]
+                    else:
+                        betterCity =""
                     county = county.replace(" ", "")
                     betterCounty = county[0:4]
                     betterCity += "-"+betterCounty
@@ -361,7 +372,7 @@ class fufillOrders(EnviromentSetUp):
 
                     for child in cityList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
-                            print(otherChild.get_attribute("innerHTML"))
+                            # print(otherChild.get_attribute("innerHTML"))
                             # SANTA FE SPR-LOSA first 12 + "-LOSA"
                             # RANCHO DOMIN-LOSA    HACIENDA HEI-LOSA
                             if(otherChild.get_attribute("innerHTML") == betterCity.replace(" ", "")):

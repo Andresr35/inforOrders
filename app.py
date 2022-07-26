@@ -101,7 +101,6 @@ def main():
                     try:
                         fufillOrders.finishOrder(
                             value["shippingAmount"], value["discount"], value["shippingZip"])
-                        finishedOrders.append(key)
                     except Exception:
                         print("could not finish order")
                         raise
