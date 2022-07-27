@@ -22,6 +22,7 @@ class fufillOrders(EnviromentSetUp):
     login logs you in
     """
 
+    #FIXME: Error handling kinda sucks with printing to console... Make easier to troubleshoot
     def login(user, password) -> None:
         """starts the web selenium server and logs into infor on company 40. Ends up taking you to order entry page
 
@@ -87,6 +88,7 @@ class fufillOrders(EnviromentSetUp):
             print("logged in")
 
         except Exception:
+            print("could not login")
             raise
 
     def closeWeb() -> None:
@@ -242,8 +244,10 @@ class fufillOrders(EnviromentSetUp):
             #     By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[3]/button')
             # settings.click()
 
-            lineEntry = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')
+            # FIXME: there's an error here that happens with Ezra, not sure why he can't click it...the element gets intercepting by something. I'll change to wait till clickable
+
+            lineEntry = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')))
             lineEntry.click()
 
             quickLine = web.find_element(
@@ -318,10 +322,10 @@ class fufillOrders(EnviromentSetUp):
 
             time.sleep(0.25)
             try:
-                if (state == "CA"): #countrydrop = ???
-                    countryDrop:WebElement = wait.until(EC.element_to_be_clickable(
+                if (state == "CA"):  # countrydrop = ???
+                    countryDrop: WebElement = wait.until(EC.element_to_be_clickable(
                         (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
-                        #           /html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div
+                    #           /html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div
                     countryDrop.click()
                     time.sleep(0.5)
                     countryDrop = web.find_element(
@@ -332,10 +336,10 @@ class fufillOrders(EnviromentSetUp):
                     countyField.click()
                     time.sleep(0.25)
                     county = str(county).upper()
-                    #TODO: county needs to be 12 
-                    #SAN BERNARDI
-                    #LOS ANGELES
-                    #SAN LUIS OBI
+                    # TODO: county needs to be 12
+                    # SAN BERNARDI
+                    # LOS ANGELES
+                    # SAN LUIS OBI
                     if(len(county) > 12):
                         shortCounty = county[0:12]
 
@@ -363,7 +367,7 @@ class fufillOrders(EnviromentSetUp):
                     if(len(city) > 12):
                         betterCity = city[0:12]
                     else:
-                        betterCity =""
+                        betterCity = ""
                     county = county.replace(" ", "")
                     betterCounty = county[0:4]
                     betterCity += "-"+betterCounty
@@ -463,7 +467,7 @@ class fufillOrders(EnviromentSetUp):
             finish.click()
 
         except Exception:
-            print("Wasn't able to finish order")
+            print("Wasn't able to do taxes and shipping")
             traceback.print_exc()
             raise
         # customerSettings = web.find_element(By.XPATH,'/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[4]')
@@ -482,7 +486,7 @@ class fufillOrders(EnviromentSetUp):
             create: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             create.click()
-            print("cancelllingg")
+            print("Canceling the past failed order...should continue after this order")
         except Exception:
             traceback.print_exc()
             print("could not cancel order, will have to abort all")

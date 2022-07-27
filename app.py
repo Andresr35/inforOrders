@@ -52,8 +52,6 @@ def main():
             try:
                 fufillOrders.login(values["-Username-"], values["-Password-"])
             except Exception:
-                print("could not login")
-
                 window['-Update-'].update("Could not login. Try again!")
                 window.force_focus()
                 continue
@@ -70,7 +68,6 @@ def main():
                         key, value["shippingState"], value["shippingCountry"], value["method"])
                 # will only login, wont cancel order since it doesnt need to then continue
                 except Exception:
-                    print("could not setup order")
                     fufillOrders.closeWeb()
                     fufillOrders.login(
                         values["-Username-"], values["-Password-"])
@@ -83,7 +80,6 @@ def main():
                         fufillOrders.editShipping(value["shippingName"], value["shippingStreet"], value["shippingCity"],
                                                 value["shippingState"], value["shippingZip"], value["shippingCountry"])
                     except Exception:
-                        print("could not setup order")
                         raise
 
                     # Tries to add line items
@@ -94,7 +90,6 @@ def main():
                                 # all the values from the line items
                                 item["sku"], item["quantity"], item["price"])
                     except Exception:
-                        print("could not add line items")
                         raise
 
                     # Finishes up the order by doing taxes and shipping
@@ -102,15 +97,15 @@ def main():
                         fufillOrders.finishOrder(
                             value["shippingAmount"], value["discount"], value["shippingZip"])
                     except Exception:
-                        print("could not finish order")
                         raise
 
                     # finished order and add to array
                     finishedOrders.append(key)
+                    print("Finished order " + key)
 
                 # Will relogin and cancel previous order then continue
                 except Exception:
-                    print("could not do order " + key)
+                    print("Could not do order " + key)
                     failedOrders.append(key)
 
                     fufillOrders.login(
