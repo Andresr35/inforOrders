@@ -312,11 +312,12 @@ class fufillOrders(EnviromentSetUp):
                     city = (i['city'])
                     break
 
-            addLines = wait.until(EC.visibility_of_element_located(
+            addLines:WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
             addLines.click()
-
-            taxButton = wait.until(EC.element_to_be_clickable(
+            #TODO: THis is still broken..because the button is clickable, but add lines button causes the load to refresh, so force a time.sleep here
+            time.sleep(2)
+            taxButton:WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3]')))
             taxButton.click()
 
