@@ -44,13 +44,14 @@ class fufillOrders(EnviromentSetUp):
             signInSubmit = web.find_element(
                 By.XPATH, '//*[@id="submitButton"]')
             signInSubmit.click()
-            wait = WebDriverWait(web, 10)
+            wait = WebDriverWait(web, 30)
+            longerWait = WebDriverWait(web, 120)
 
             # https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524
             # this is the second page that they will be led to, which is the infor loging
 
             # checking to see if the document management tab is open cause it needs to be closed
-            documentMng = wait.until(EC.visibility_of_element_located(
+            documentMng:WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '//*[@id="body"]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]')))
             if ("expanded" in documentMng.get_attribute("class")):
                 close = web.find_element(
@@ -62,7 +63,7 @@ class fufillOrders(EnviromentSetUp):
             # entering the frame inside the infor website which is where all the action is
             wait.until(EC.frame_to_be_available_and_switch_to_it(
                 (By.NAME, "sxeweb_d7de089b-7e09-4476-a5f5-80697edc7524")))  # class =m-app-frame
-            inforUser = wait.until(EC.visibility_of_element_located(
+            inforUser:WebElement = longerWait.until(EC.element_to_be_clickable(#/html/body/div[2]/div/section/form/div[2]/input or //*[@id="signin-userid"]
                 (By.XPATH, '//*[@id="signin-userid"]')))
             inforUser.send_keys(str(user))
 
@@ -130,13 +131,13 @@ class fufillOrders(EnviromentSetUp):
                 if(country == "United States" or country == "US"):
                     if(state == "CA"):
                         customer = "40003"
-                        print("CA worked")
+                        # print("CA worked")
                     else:
                         customer = "40004"
-                        print("out of state")
+                        # print("out of state")k
                 else:
                     customer = "40005"
-                    print("INT worked")
+                    # print("INT worked")k
 
             time.sleep(0.25)
             customerField = wait.until(EC.visibility_of_element_located(
@@ -316,22 +317,31 @@ class fufillOrders(EnviromentSetUp):
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
             addLines.click()
             #TODO: THis is still broken..because the button is clickable, but add lines button causes the load to refresh, so force a time.sleep here
-            time.sleep(2)
+            time.sleep(4)
             taxButton:WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3]')))
-            taxButton.click()
 
+            try:
+                taxButton.click()
+            except:
+                #/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3] this is the button
+                time.sleep(10)
+                traceback.print_exc()
+                print("Tried to go to taxes tab, but was not able to click...Either wait more time or error popped up\n")
             time.sleep(0.25)
             try:
                 if (state == "CA"):  # countrydrop = ???
-                    countryDrop: WebElement = wait.until(EC.element_to_be_clickable(
+                    stateDrop: WebElement = wait.until(EC.element_to_be_clickable(
                         (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
                     #           /html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div
-                    countryDrop.click()
+                    stateDrop.click()
                     time.sleep(0.5)
-                    countryDrop = web.find_element(
-                        By.XPATH, '/html/body/div[8]/span')
-                    countryDrop.click()
+                    #FIXME Apparently this didnt exitst... there was a taxing state and county but no country...customer 40010
+                    # stateDrop = web.find_element(
+                    #     By.XPATH, '/html/body/div[8]/span') should i change to this? /html/body/div[@class="dropdown-list is-ontop is-closable"]
+                    stateDrop = web.find_element(
+                        By.XPATH, '/html/body/div[@id="dropdown-list"]/span')
+                    stateDrop.click()
                     countyField = web.find_element(
                         By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div')
                     countyField.click()
@@ -343,9 +353,11 @@ class fufillOrders(EnviromentSetUp):
                     # SAN LUIS OBI
                     if(len(county) > 12):
                         shortCounty = county[0:12]
+                    else:
+                        shortCounty = county
 
                     countyList = web.find_element(
-                        By.XPATH, '/html/body/div[8]/ul')
+                        By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')#/html/body/div[12]/ul
 
                     for child in countyList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
@@ -365,15 +377,15 @@ class fufillOrders(EnviromentSetUp):
                     cityField.click()
                     time.sleep(0.25)
                     city = str(city).upper()
-                    if(len(city) > 12):
-                        betterCity = city[0:12]
-                    else:
-                        betterCity = ""
                     county = county.replace(" ", "")
                     betterCounty = county[0:4]
-                    betterCity += "-"+betterCounty
+                    if(len(city) > 12):
+                        betterCity = city[0:12]+"-"+betterCounty
+                    else:
+                        betterCity = city+"-"+betterCounty
+
                     cityList = web.find_element(
-                        By.XPATH, '/html/body/div[8]/ul')
+                        By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')
 
                     for child in cityList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
@@ -396,8 +408,8 @@ class fufillOrders(EnviromentSetUp):
             recalculate = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             recalculate.click()
-            time.sleep(1)
-            addons = wait.until(EC.element_to_be_clickable(
+            time.sleep(3)
+            addons:WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
             addons.click()
 
@@ -487,8 +499,8 @@ class fufillOrders(EnviromentSetUp):
             create: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             create.click()
-            print("Canceling the past failed order...should continue after this order")
+            print("Canceling the past failed order...continuing after this order")
         except Exception:
             traceback.print_exc()
-            print("could not cancel order, will have to abort all")
+            print("Could not cancel order, will have to abort all")
             raise
