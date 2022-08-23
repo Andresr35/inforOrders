@@ -1,11 +1,11 @@
 
 # import PySimpleGUI as sgK
 
+import os
 import traceback
-from csvUtils import csvUtils
+from Utils import csvUtils
 from fufillOrders import fufillOrders
 import PySimpleGUI as sg
-
 
 
 def setUpGui() -> sg.Window:
@@ -15,7 +15,6 @@ def setUpGui() -> sg.Window:
         window: selenium window
     """
 
-
     # Add a touch of color DarkBlue3 or Default
     sg.theme('DefaultNoMoreNagging')
     # All the stuff inside your window.
@@ -23,7 +22,7 @@ def setUpGui() -> sg.Window:
     layout = [
         # [sg.Titlebar(title='Order Automation')],
         [sg.Push(), sg.Text('Enter your infor Login!'), sg.Push()],
-        [sg.Push(),sg.Text('Version 1.0'),sg.Push()],
+        [sg.Push(), sg.Text('Version 1.0'), sg.Push()],
         [sg.Push(), sg.Text('', key="-Update-", text_color="red"), sg.Push()],
         [sg.Text('Username:'), sg.InputText(key="-Username-")],
         [sg.Text('Password:'), sg.InputText(key="-Password-")],
@@ -33,12 +32,15 @@ def setUpGui() -> sg.Window:
         [sg.Push(), sg.Button('Ok'), sg.Button('Cancel')],
         [sg.Push(), sg.Text('', key="-Failed-", text_color="red"), sg.Push()],
         [sg.Push(), sg.Text('', key="-Finished-", text_color="green"), sg.Push()],
+        [sg.Push(), sg.Button('Export Failed Orders', key='-Export-'), sg.Push()],
     ]
 
     # Create the Window
-    window = sg.Window('Order Automation', layout)
+    window = sg.Window('Order Automation', layout, resizable=True)
     return window
 # window = setUpGui()
+
+
 def main():
     window = setUpGui()
 
@@ -69,6 +71,8 @@ def main():
                         key, value["shippingState"], value["shippingCountry"], value["method"])
                 # will only login, wont cancel order since it doesnt need to then continue
                 except Exception:
+                    print("Could not do order " + key)
+                    failedOrders.append(key)
                     fufillOrders.closeWeb()
                     fufillOrders.login(
                         values["-Username-"], values["-Password-"])
@@ -79,7 +83,7 @@ def main():
                     # edit shipping stuff
                     try:
                         fufillOrders.editShipping(value["shippingName"], value["shippingStreet"], value["shippingCity"],
-                                                value["shippingState"], value["shippingZip"], value["shippingCountry"])
+                                                  value["shippingState"], value["shippingZip"], value["shippingCountry"])
                     except Exception:
                         raise
 
@@ -118,11 +122,15 @@ def main():
             window['-Failed-'].update("Failed orders: "+str(failedOrders))
             window['-Finished-'].update("Finished orders: " +
                                         str(finishedOrders))
+
+            csvUtils.createCSV(finishedOrders, failedOrders)
+
             window.force_focus()
 
             fufillOrders.closeWeb()
             print("finished")
-
+        if event == '-Export-':
+            os.system('orders.csv')
         if event in (sg.WIN_CLOSED, 'Cancel'):  # if user closes window or clicks cancel
             try:
                 fufillOrders.closeWeb()
@@ -132,5 +140,6 @@ def main():
 
     window.close()
 
-if __name__ ==  "__main__":
+
+if __name__ == "__main__":
     main()
