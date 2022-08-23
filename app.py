@@ -100,7 +100,7 @@ def main():
                     # Finishes up the order by doing taxes and shipping
                     try:
                         fufillOrders.finishOrder(
-                            value["shippingAmount"], value["discount"], value["shippingZip"])
+                            value["shippingAmount"], value["discount"], value["shippingZip"],len(value["lineItems"]))
                     except Exception:
                         raise
 

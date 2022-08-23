@@ -146,8 +146,13 @@ class fufillOrders(EnviromentSetUp):
             time.sleep(0.25)
             customerField: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
-            customerField.send_keys(str(customer))
-            time.sleep(0.25)
+            try:
+                customerField.send_keys(str(customer))
+                time.sleep(0.25)
+            except:
+                print("Only 'Paypal Express Checkout' and 'Shopify Payments' is accepted as a payment method. '",
+                      method, "' was entered.")
+                raise Exception("Invalid Payment Method entered.")
 
             warehouse = web.find_element(
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
@@ -189,11 +194,11 @@ class fufillOrders(EnviromentSetUp):
         web = EnviromentSetUp.web
         wait = WebDriverWait(web, 10)
         try:
-            editShip = wait.until(EC.visibility_of_element_located(
+            editShip:WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
             editShip.click()
 
-            nameField = wait.until(EC.visibility_of_element_located(
+            nameField:WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/div/input')))
             nameField.clear()
             nameField.send_keys(str(name))
@@ -224,22 +229,28 @@ class fufillOrders(EnviromentSetUp):
 
             # TODO: make this work with all other countries.. maybe get a json with country codes and match them up to their actual country name. Test out taxes for it too.
 
-            countryDrop:WebElement = wait.until(EC.element_to_be_clickable(
+            countryDrop: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
             countryDrop.click()
 
             countryList: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
 
+            countryClicked = False
             for child in countryList.find_elements(By.XPATH, './/*'):
+
                 for otherChild in child.find_elements(By.XPATH, './/*'):
 
                     if(otherChild.get_attribute("innerHTML") == country):
                         otherChild.click()
+                        countryClicked = True
                         break
                 else:
                     continue
                 break
+
+            if (countryClicked == False):
+                raise Exception("Country was not clicked")
 
             enterAddress = web.find_element(
                 By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')
@@ -295,7 +306,7 @@ class fufillOrders(EnviromentSetUp):
             print("wasn't able to add a line item")
             traceback.print_exc()
 
-    def finishOrder(shipping: float, discount, zip: int) -> None:
+    def finishOrder(shipping: float, discount, zip: int, shopTotalQuantity: int) -> None:
         """does taxes and shipping, then gets ready to do next order entry
 
         Args:
@@ -317,12 +328,28 @@ class fufillOrders(EnviromentSetUp):
                     state = (i['state'])
                     city = (i['city'])
                     break
-            #FIXME: make sure we are putting down the right quantiy of products before proceeding, because ezra says we have not been doing that
+            # FIXME: make sure we are putting down the right quantiy of products before proceeding, because ezra says we have not been doing that
             # so i need a total products in the dict and i need to find the html for it here and some code to check if they are matching.
             # if they are not matching raise error.
 
+            totalQuantityElement: WebElement = wait.until(EC.visibility_of_element_located(
+                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[1]/span[2]')))
+
+            inforTotalQuanity = ((totalQuantityElement.get_attribute(
+                "innerHTML")).replace("(", "")).replace(")", "")
+
+            print("infor total:\t", inforTotalQuanity)
+            print("shop quant: \t", shopTotalQuantity)
+
+            if(shopTotalQuantity == int(inforTotalQuanity)):
+                print("good!", "\n")
+            else:
+                print("bad")
+                raise Exception("Total quantiy does not match")
+
             addLines: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
+
             addLines.click()
 
             time.sleep(4)
@@ -336,13 +363,15 @@ class fufillOrders(EnviromentSetUp):
                     # INFOR randomly gives an error. This dismisses it.
                     # if the warning pops up, prob handle it here. /html/body/div[30]/div/div/div/div[2]/div/p x path for message..."Units Not Set Up in Unit Table - ICSEU or SASTT (4026)"
                     unitError: WebElement = wait.until(EC.element_to_be_clickable(
-                        (By.XPATH, '/html/body/div[30]/div/div/div/div[3]/button')))
+                        (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div/div/div[3]/button')))
                     unitError.click()
+                    time.sleep(3)
+                    taxButton.click()
                 except:
                     traceback.print_exc()
-                print(
-                    "Tried to go to taxes tab, but was not able to click...Either wait more time or error popped up\n")
-                raise
+                    print(
+                        "Tried to go to taxes tab, but was not able to click... wait more on timeout\n")
+                    raise
 
             time.sleep(0.25)
             try:
@@ -369,19 +398,25 @@ class fufillOrders(EnviromentSetUp):
 
                     countyList = web.find_element(
                         By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')
-
+                    cityState = False
                     for child in countyList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
 
                             if(otherChild.get_attribute("innerHTML") == shortCounty.replace(" ", "")):
                                 otherChild.click()
+                                cityState = True
                                 break
                             elif(otherChild.get_attribute("innerHTML") == shortCounty):
                                 otherChild.click()
+                                cityState = True
                                 break
                         else:
                             continue
                         break
+
+                    if (cityState == False):
+                        print("City was not clicked in Taxes section")
+                        raise Exception("City Not Found")
 
                     cityField = web.find_element(
                         By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[3]/div/div')
