@@ -3,3 +3,4 @@ __pycache__/
 .env
 sitePackages
 orders.csv
+secret.py

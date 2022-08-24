@@ -14,13 +14,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from Utils import jsonUtils
 from WebDriver import EnviromentSetUp
-
+from secret import inforAccountLogin, inforAccountPassword
+# from secrets import inforLogin, inforPassword
 # fufillOrders grabs the login info for a user
 
 
 class fufillOrders(EnviromentSetUp):
 
-    # FIXME: Error handling kinda sucks with printing to console... Make easier to troubleshoot
+
     def login(user, password) -> None:
         """starts the web selenium server and logs into infor on company 40. Ends up taking you to order entry page
 
@@ -32,17 +33,18 @@ class fufillOrders(EnviromentSetUp):
             whatever = EnviromentSetUp
             whatever.setUp()
             web = EnviromentSetUp.web
+            wait = WebDriverWait(web, 30)
             # this is the first page that they will be led to, which is some weird login
             web.get("https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524?favoriteContext=oeet.initiate&LogicalId=lid://infor.sx.1")
-            signInUser = web.find_element(By.XPATH, '//*[@id="userNameInput"]')
-            signInUser.send_keys("acumen@val2017")
-            signInPassword = web.find_element(
-                By.XPATH, '//*[@id="passwordInput"]')
-            signInPassword.send_keys('17SHTinfor/')
-            signInSubmit = web.find_element(
-                By.XPATH, '//*[@id="submitButton"]')
+            signInUser:WebElement = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="userNameInput"]')))
+            signInUser.send_keys(inforAccountLogin)
+            signInPassword:WebElement = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '//*[@id="passwordInput"]')))
+            signInPassword.send_keys(inforAccountPassword)
+            signInSubmit:WebElement = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '//*[@id="submitButton"]')))
             signInSubmit.click()
-            wait = WebDriverWait(web, 30)
+           
             longerWait = WebDriverWait(web, 120)
 
             # https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524
@@ -52,8 +54,8 @@ class fufillOrders(EnviromentSetUp):
             documentMng: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '//*[@id="body"]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]')))
             if ("expanded" in documentMng.get_attribute("class")):
-                close = web.find_element(
-                    By.XPATH, '/html/body/div[2]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]/button')
+                close = wait.until(EC.visibility_of_element_located((
+                    By.XPATH, '/html/body/div[2]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]/button')))
                 close.click()
 
             # elif("collapsed" in documentMng.get_attribute("class")):
@@ -65,16 +67,16 @@ class fufillOrders(EnviromentSetUp):
                 (By.XPATH, '//*[@id="signin-userid"]')))
             inforUser.send_keys(str(user))
 
-            inforPassword = web.find_element(
-                By.XPATH, '//*[@id="signin-password"]')
-            inforCompany = web.find_element(
-                By.XPATH, '//*[@id="signin-company"]')
+            inforPassword = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '//*[@id="signin-password"]')))
+            inforCompany = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '//*[@id="signin-company"]')))
 
             inforPassword.send_keys(str(password))
             inforCompany.send_keys("40")
 
-            inforSubmit = web.find_element(
-                By.XPATH, '//*[@id="sign-in-view"]/section/form/button')
+            inforSubmit = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '//*[@id="sign-in-view"]/section/form/button')))
             inforSubmit.click()
 
             # FIXME: Sometimes inforOp will not pop up on the first time? I'll do a try catch for this where if it fails check to see if customer field is there, if not then raise error
@@ -154,25 +156,25 @@ class fufillOrders(EnviromentSetUp):
                       method, "' was entered.")
                 raise Exception("Invalid Payment Method entered.")
 
-            warehouse = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')
+            warehouse = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')))
             warehouse.send_keys('V01')
             time.sleep(0.25)
 
-            shipvia = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')
+            shipvia:WebElement = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')))
 
             time.sleep(.5)
             shipvia.clear()
             shipvia.send_keys('UG')
 
             time.sleep(.5)
-            orderID = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')
+            orderID:WebElement = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')))
             orderID.send_keys(str(po))
 
-            initNext = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')
+            initNext:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')))
             initNext.click()
         except Exception:
             print("could not setup order")
@@ -203,23 +205,23 @@ class fufillOrders(EnviromentSetUp):
             nameField.clear()
             nameField.send_keys(str(name))
 
-            addressField = web.find_element(
-                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')
+            addressField = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')))
             addressField.clear()
             addressField.send_keys(str(address))
 
-            cityField = web.find_element(
-                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')  # /html/body/div[6]
+            cityField = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')))  
             cityField.clear()
             cityField.send_keys(str(city))
 
-            stateField = web.find_element(
-                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')
+            stateField = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')))
             stateField.clear()
             stateField.send_keys(str(state))
 
-            zipField = web.find_element(
-                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')
+            zipField = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')))
             zipField.clear()
             zipField.send_keys(str(zip))
 
@@ -227,7 +229,7 @@ class fufillOrders(EnviromentSetUp):
             countryDict = jsonUtils.readJSON()
             country = countryDict[countryCode]
 
-            # TODO: make this work with all other countries.. maybe get a json with country codes and match them up to their actual country name. Test out taxes for it too.
+
 
             countryDrop: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
@@ -252,16 +254,16 @@ class fufillOrders(EnviromentSetUp):
             if (countryClicked == False):
                 raise Exception("Country was not clicked")
 
-            enterAddress = web.find_element(
-                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')
+            enterAddress:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')))
             enterAddress.click()
 
-            lineEntry = wait.until(EC.element_to_be_clickable((
+            lineEntry:WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')))
             lineEntry.click()
 
-            quickLine = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')
+            quickLine:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')))
             quickLine.click()
 
         except Exception:
@@ -285,21 +287,21 @@ class fufillOrders(EnviromentSetUp):
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')))
             product.send_keys(str(sku))
 
-            quantityField = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')
+            quantityField:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')))
             quantityField.click()
             quantityField.clear()
             quantityField.send_keys(quantity)
 
-            priceField = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')
+            priceField:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')))
             priceField.clear()
             time.sleep(0.5)
             priceField.click()
             priceField.send_keys(price)
 
-            add = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')
+            add:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')))
             add.click()
 
         except Exception:
@@ -328,9 +330,6 @@ class fufillOrders(EnviromentSetUp):
                     state = (i['state'])
                     city = (i['city'])
                     break
-            # FIXME: make sure we are putting down the right quantiy of products before proceeding, because ezra says we have not been doing that
-            # so i need a total products in the dict and i need to find the html for it here and some code to check if they are matching.
-            # if they are not matching raise error.
 
             totalQuantityElement: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[1]/span[2]')))
@@ -382,11 +381,11 @@ class fufillOrders(EnviromentSetUp):
                     stateDrop.click()
                     time.sleep(0.5)
 
-                    stateDrop = web.find_element(
-                        By.XPATH, '/html/body/div[@id="dropdown-list"]/span')
+                    stateDrop:WebElement =wait.until(EC.element_to_be_clickable((
+                        By.XPATH, '/html/body/div[@id="dropdown-list"]/span')))
                     stateDrop.click()
-                    countyField = web.find_element(
-                        By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div')
+                    countyField:WebElement = wait.until(EC.element_to_be_clickable((
+                        By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div')))
                     countyField.click()
                     time.sleep(0.25)
                     county = str(county).upper()
@@ -396,8 +395,8 @@ class fufillOrders(EnviromentSetUp):
                     else:
                         shortCounty = county
 
-                    countyList = web.find_element(
-                        By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')
+                    countyList:WebElement = wait.until(EC.visibility_of_element_located((
+                        By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
                     cityState = False
                     for child in countyList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
@@ -418,8 +417,8 @@ class fufillOrders(EnviromentSetUp):
                         print("City was not clicked in Taxes section")
                         raise Exception("City Not Found")
 
-                    cityField = web.find_element(
-                        By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[3]/div/div')
+                    cityField:WebElement = wait.until(EC.element_to_be_clickable((
+                        By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[3]/div/div')))
                     cityField.click()
                     time.sleep(0.25)
                     city = str(city).upper()
@@ -430,8 +429,8 @@ class fufillOrders(EnviromentSetUp):
                     else:
                         betterCity = city+"-"+betterCounty
 
-                    cityList = web.find_element(
-                        By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')
+                    cityList:WebElement = wait.until(EC.visibility_of_element_located((
+                        By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
 
                     for child in cityList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
@@ -475,8 +474,8 @@ class fufillOrders(EnviromentSetUp):
             time.sleep(0.5)
             freightAmount.send_keys(shipping)
 
-            finishFreight = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[2]/div[2]/button[1]')
+            finishFreight:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[2]/div[2]/button[1]')))
             finishFreight.click()
 
             goBack = wait.until(EC.element_to_be_clickable(
@@ -506,21 +505,21 @@ class fufillOrders(EnviromentSetUp):
             dec *= 100
             discountAmount.send_keys(int(dec))
 
-            discountDropdown = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/div/div')
+            discountDropdown:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/div/div')))
             discountDropdown.click()
 
-            discountType = wait.until(EC.element_to_be_clickable(
+            discountType:WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul/li[1]/a')))
             discountType.click()
 
             discountAmount.click()
 
-            submit = web.find_element(
-                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')
+            submit:WebElement = wait.until(EC.element_to_be_clickable((
+                By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')))
             submit.click()
 
-            finish = wait.until(EC.element_to_be_clickable(
+            finish:WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')))
             finish.click()
 

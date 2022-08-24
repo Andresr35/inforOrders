@@ -1,7 +1,6 @@
-import pandas as pd
 import csv
 import json
-
+import pandas as pd
 
 
 class csvUtils:
