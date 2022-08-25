@@ -12,17 +12,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
+from secret import inforAccountLogin, inforAccountPassword
 from Utils import jsonUtils
 from WebDriver import EnviromentSetUp
-from secret import inforAccountLogin, inforAccountPassword
-# from secrets import inforLogin, inforPassword
-# fufillOrders grabs the login info for a user
 
 
 class fufillOrders(EnviromentSetUp):
 
-
-    def login(user, password) -> None:
+    def login(user: str, password: str) -> None:
         """starts the web selenium server and logs into infor on company 40. Ends up taking you to order entry page
 
         Args:
@@ -30,57 +28,59 @@ class fufillOrders(EnviromentSetUp):
             password (str): password for infor
         """
         try:
-            whatever = EnviromentSetUp
-            whatever.setUp()
+
+            # Setting up web objects to be passed around
+            EnviromentSetUp.setUp()
             web = EnviromentSetUp.web
             wait = WebDriverWait(web, 30)
-            # this is the first page that they will be led to, which is some weird login
+            longerWait = WebDriverWait(web, 120)
+            transition = 4
+
+            # This is the link to the Order Entry page. First asks to login to infor account and then personal infor account.
             web.get("https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524?favoriteContext=oeet.initiate&LogicalId=lid://infor.sx.1")
-            signInUser:WebElement = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="userNameInput"]')))
+            signInUser: WebElement = wait.until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="userNameInput"]')))
             signInUser.send_keys(inforAccountLogin)
-            signInPassword:WebElement = wait.until(EC.visibility_of_element_located((
+            signInPassword: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="passwordInput"]')))
             signInPassword.send_keys(inforAccountPassword)
-            signInSubmit:WebElement = wait.until(EC.visibility_of_element_located((
+            signInSubmit: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="submitButton"]')))
             signInSubmit.click()
-           
-            longerWait = WebDriverWait(web, 120)
 
-            # https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524
-            # this is the second page that they will be led to, which is the infor loging
-
-            # checking to see if the document management tab is open cause it needs to be closed
+            # Checking to see if the document management tab is open cause it needs to be closed
             documentMng: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '//*[@id="body"]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]')))
             if ("expanded" in documentMng.get_attribute("class")):
-                close = wait.until(EC.visibility_of_element_located((
+                close: WebElement = wait.until(EC.visibility_of_element_located((
                     By.XPATH, '/html/body/div[2]/infor-mingle-shell/nav-menu/div/header/section[2]/drop-menu/div[1]/ul/li[5]/button')))
                 close.click()
 
-            # elif("collapsed" in documentMng.get_attribute("class")):
-
-            # entering the frame inside the infor website which is where all the action is
+            # Entering the frame inside the infor website which is where all the action is
             wait.until(EC.frame_to_be_available_and_switch_to_it(
                 (By.NAME, "sxeweb_d7de089b-7e09-4476-a5f5-80697edc7524")))  # class =m-app-frame
-            inforUser: WebElement = longerWait.until(EC.element_to_be_clickable(  # /html/body/div[2]/div/section/form/div[2]/input or //*[@id="signin-userid"]
+
+            # Signing into personal infor account.
+            time.sleep(transition)
+            inforUser: WebElement = longerWait.until(EC.element_to_be_clickable(
                 (By.XPATH, '//*[@id="signin-userid"]')))
-            inforUser.send_keys(str(user))
 
-            inforPassword = wait.until(EC.visibility_of_element_located((
+            inforPassword: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="signin-password"]')))
-            inforCompany = wait.until(EC.visibility_of_element_located((
+            inforCompany: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="signin-company"]')))
-
+            inforUser.send_keys(str(user))
             inforPassword.send_keys(str(password))
             inforCompany.send_keys("40")
 
-            inforSubmit = wait.until(EC.visibility_of_element_located((
+            inforSubmit: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="sign-in-view"]/section/form/button')))
             inforSubmit.click()
 
-            # FIXME: Sometimes inforOp will not pop up on the first time? I'll do a try catch for this where if it fails check to see if customer field is there, if not then raise error
             try:
+                # Trying to clear past operator session. Sometimes this doesn't pop up, if it
+                # doesn't check to see if we made it to the customer setup page and continue
+                time.sleep(transition)
                 inforOp: WebElement = wait.until(EC.visibility_of_element_located(
                     (By.CLASS_NAME, 'btn-modal-primary')))
                 inforOp.click()
@@ -93,10 +93,10 @@ class fufillOrders(EnviromentSetUp):
             customerField = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
 
-            print("logged in")
+            print("Logged in!")
 
         except Exception:
-            print("could not login")
+            print("Could not login!")
             raise
 
     def closeWeb() -> None:
@@ -105,9 +105,7 @@ class fufillOrders(EnviromentSetUp):
         web = EnviromentSetUp.web
         web.close()
 
-   # AV == shopify vs paypal which changes the customer number thign ex.40010
-
-    def setUpOrder(po,  state,  country, method) -> None:
+    def setUpOrder(po: str,  state: str,  country: str, method: str) -> None:
         '''
         :Args:
             - po - PO number from shopify of the customer
@@ -117,71 +115,68 @@ class fufillOrders(EnviromentSetUp):
         '''
         try:
 
-         # just gets ready to actually start looping through orders
+            # Setting up web objects to be passed around
             web = EnviromentSetUp.web
             wait = WebDriverWait(web, 10)
+            longerWait = WebDriverWait(web, 30)
+            transition = 4
+            inputTrans = 0.5
 
+            # Defining the customer number, which is dependent on the country
+            # state, and method of payment
             if(method == "Shopify Payments"):
-                print(country)
                 if(country == "United States" or country == "US"):
                     if(state == "CA"):
                         customer = "40010"
-
                     else:
                         customer = "40011"
                 else:
                     customer = "40012"
-
             elif(method == "PayPal Express Checkout"):
                 print(country)
                 if(country == "United States" or country == "US"):
                     if(state == "CA"):
                         customer = "40003"
-                        # print("CA worked")
                     else:
                         customer = "40004"
-                        # print("out of state")k
                 else:
                     customer = "40005"
-                    # print("INT worked")k
 
-            time.sleep(0.25)
+            # Starting to fill out all fields of this page.
+            time.sleep(transition)
             customerField: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
+            # Try block in case customer was not defined. This happens when the method is different.
             try:
                 customerField.send_keys(str(customer))
-                time.sleep(0.25)
+                time.sleep(inputTrans)
             except:
                 print("Only 'Paypal Express Checkout' and 'Shopify Payments' is accepted as a payment method. '",
                       method, "' was entered.")
                 raise Exception("Invalid Payment Method entered.")
-
-            warehouse = wait.until(EC.visibility_of_element_located((
+            warehouse: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')))
             warehouse.send_keys('V01')
-            time.sleep(0.25)
-
-            shipvia:WebElement = wait.until(EC.visibility_of_element_located((
+            time.sleep(inputTrans)
+            shipvia: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')))
-
-            time.sleep(.5)
+            time.sleep(inputTrans)
             shipvia.clear()
             shipvia.send_keys('UG')
-
-            time.sleep(.5)
-            orderID:WebElement = wait.until(EC.visibility_of_element_located((
+            time.sleep(inputTrans)
+            orderID: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[5]/input')))
             orderID.send_keys(str(po))
-
-            initNext:WebElement = wait.until(EC.element_to_be_clickable((
+            initNext: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')))
             initNext.click()
+
         except Exception:
-            print("could not setup order")
+            print("Could not setup order")
             traceback.print_exc()
             raise
 
-    def editShipping(name, address, city, state, zip, countryCode: str) -> None:
+    def editShipping(name: str, address: str, city: str, state: str, zip, countryCode: str) -> None:
         """edits the shipping address in infor and gets ready to start adding line items.
 
         Args:
@@ -193,34 +188,38 @@ class fufillOrders(EnviromentSetUp):
             country (str): shipping country
         """
 
+        # Setting up web objects to be passed around
         web = EnviromentSetUp.web
         wait = WebDriverWait(web, 10)
+        longerWait = WebDriverWait(web, 30)
+        transition = 4
+        inputTrans = 0.5
+
         try:
-            editShip:WebElement = wait.until(EC.visibility_of_element_located(
+            # Start inputting address of the customer
+            time.sleep(transition)
+            print("Starting to input shipping details.")
+            editShip: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[1]/div[1]/div/div[2]/div[2]/div/div/div/div/button')))
             editShip.click()
-
-            nameField:WebElement = wait.until(EC.visibility_of_element_located(
+            time.sleep(transition)
+            nameField: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/div/input')))
             nameField.clear()
             nameField.send_keys(str(name))
-
-            addressField = wait.until(EC.visibility_of_element_located((
+            addressField: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[1]/input')))
             addressField.clear()
             addressField.send_keys(str(address))
-
-            cityField = wait.until(EC.visibility_of_element_located((
-                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')))  
+            cityField: WebElement = wait.until(EC.visibility_of_element_located((
+                By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[5]/input')))
             cityField.clear()
             cityField.send_keys(str(city))
-
-            stateField = wait.until(EC.visibility_of_element_located((
+            stateField: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[1]/input')))
             stateField.clear()
             stateField.send_keys(str(state))
-
-            zipField = wait.until(EC.visibility_of_element_located((
+            zipField: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[6]/div[2]/input')))
             zipField.clear()
             zipField.send_keys(str(zip))
@@ -228,21 +227,15 @@ class fufillOrders(EnviromentSetUp):
             # Comes from countries.json. Converts shopify country code to full name to use to find inner html
             countryDict = jsonUtils.readJSON()
             country = countryDict[countryCode]
-
-
-
             countryDrop: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[2]/div/custom-control/div/div/div/div[7]/div/div')))
             countryDrop.click()
-
             countryList: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
-
             countryClicked = False
+            # Goes through each item in the country list to click the right shipping country.
             for child in countryList.find_elements(By.XPATH, './/*'):
-
                 for otherChild in child.find_elements(By.XPATH, './/*'):
-
                     if(otherChild.get_attribute("innerHTML") == country):
                         otherChild.click()
                         countryClicked = True
@@ -251,27 +244,30 @@ class fufillOrders(EnviromentSetUp):
                     continue
                 break
 
+            # In Case none of the countries were clicked.
             if (countryClicked == False):
-                raise Exception("Country was not clicked")
+                raise Exception(
+                    "Country was not clicked. Wrong Country Code or Infor Country Spelling")
 
-            enterAddress:WebElement = wait.until(EC.element_to_be_clickable((
+            # Moving on and getting ready to start adding products.
+            enterAddress: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[@class="modal-page-container"]/div/div[1]/form/div[3]/button[2]')))
             enterAddress.click()
-
-            lineEntry:WebElement = wait.until(EC.element_to_be_clickable((
+            print("Finished editing shipping!")
+            time.sleep(transition)
+            lineEntry: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[5]')))
             lineEntry.click()
-
-            quickLine:WebElement = wait.until(EC.element_to_be_clickable((
+            quickLine: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/div/ul/li[2]/a')))
             quickLine.click()
 
         except Exception:
-            print("could not edit shipping")
+            print("Could not edit shipping")
             traceback.print_exc()
             raise
 
-    def addLineItem(sku, quantity, price: float) -> None:
+    def addLineItem(sku: str, quantity, price: float) -> None:
         """adds in products to the product
 
         Args:
@@ -280,33 +276,41 @@ class fufillOrders(EnviromentSetUp):
             price (float): price the product was sold for
         """
         try:
+            # Setting up web objects to be passed around
             web = EnviromentSetUp.web
             wait = WebDriverWait(web, 10)
+            longerWait = WebDriverWait(web, 30)
+            transition = 4
+            inputTrans = 0.5
 
-            product = wait.until(EC.visibility_of_element_located(
+            # Starting to input products to line item section.
+            time.sleep(transition)
+            product: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[2]/span/input')))
             product.send_keys(str(sku))
-
-            quantityField:WebElement = wait.until(EC.element_to_be_clickable((
+            time.sleep(inputTrans)
+            quantityField: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[1]/input')))
             quantityField.click()
             quantityField.clear()
             quantityField.send_keys(quantity)
-
-            priceField:WebElement = wait.until(EC.element_to_be_clickable((
+            time.sleep(inputTrans)
+            priceField: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/div[3]/input')))
             priceField.clear()
-            time.sleep(0.5)
+            time.sleep(inputTrans)
             priceField.click()
             priceField.send_keys(price)
-
-            add:WebElement = wait.until(EC.element_to_be_clickable((
+            time.sleep(inputTrans)
+            add: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div/div/button')))
             add.click()
+            print("Added in:\t", sku)
 
         except Exception:
-            print("wasn't able to add a line item")
+            print("Wasn't able to add a line item")
             traceback.print_exc()
+            raise
 
     def finishOrder(shipping: float, discount, zip: int, shopTotalQuantity: int) -> None:
         """does taxes and shipping, then gets ready to do next order entry
@@ -317,44 +321,43 @@ class fufillOrders(EnviromentSetUp):
             zip (int): zip code
         """
         try:
+            # Setting up web objects to be passed around
             web = EnviromentSetUp.web
             wait = WebDriverWait(web, 10)
+            longerWait = WebDriverWait(web, 30)
+            transition = 4
+            inputTrans = 0.5
 
+            # Getting the County from Zip code,and other address values.
             data = json.loads(open("cities.json").read())
             state = ''
             for i in data:
-
                 if str(i['zip_code']) == str(zip):
-
                     county = (i['county'])
                     state = (i['state'])
                     city = (i['city'])
                     break
 
+            # Checking to see if all products were added before continuing
             totalQuantityElement: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[1]/span[2]')))
-
             inforTotalQuanity = ((totalQuantityElement.get_attribute(
                 "innerHTML")).replace("(", "")).replace(")", "")
-
-            print("infor total:\t", inforTotalQuanity)
-            print("shop quant: \t", shopTotalQuantity)
-
+            print("Infor total:\t", inforTotalQuanity)
+            print("Shop quant: \t", shopTotalQuantity)
             if(shopTotalQuantity == int(inforTotalQuanity)):
                 print("good!", "\n")
             else:
                 print("bad")
                 raise Exception("Total quantiy does not match")
-
-            addLines: WebElement = wait.until(EC.visibility_of_element_located(
+            addLines: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[2]/div/div[2]/div[1]/div[2]/button[1]')))
-
             addLines.click()
 
-            time.sleep(4)
+            # Getting ready to input tax information
+            time.sleep(transition)
             taxButton: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div[1]/div[1]/div/div/div/a[3]')))
-
             try:
                 taxButton.click()
             except:
@@ -372,35 +375,33 @@ class fufillOrders(EnviromentSetUp):
                         "Tried to go to taxes tab, but was not able to click... wait more on timeout\n")
                     raise
 
-            time.sleep(0.25)
+            # CA requires more work on taxes
+            time.sleep(inputTrans)
+            print("Working on Taxes")
             try:
                 if (state == "CA"):
                     stateDrop: WebElement = wait.until(EC.element_to_be_clickable(
                         (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[1]/div/div')))
-
                     stateDrop.click()
-                    time.sleep(0.5)
-
-                    stateDrop:WebElement =wait.until(EC.element_to_be_clickable((
+                    time.sleep(inputTrans)
+                    stateDrop: WebElement = wait.until(EC.element_to_be_clickable((
                         By.XPATH, '/html/body/div[@id="dropdown-list"]/span')))
                     stateDrop.click()
-                    countyField:WebElement = wait.until(EC.element_to_be_clickable((
+                    countyField: WebElement = wait.until(EC.element_to_be_clickable((
                         By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[2]/div/div')))
                     countyField.click()
-                    time.sleep(0.25)
+                    time.sleep(inputTrans)
                     county = str(county).upper()
-
                     if(len(county) > 12):
                         shortCounty = county[0:12]
                     else:
                         shortCounty = county
-
-                    countyList:WebElement = wait.until(EC.visibility_of_element_located((
+                    countyList: WebElement = wait.until(EC.visibility_of_element_located((
                         By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
                     cityState = False
+                    # Looping through list of county to click
                     for child in countyList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
-
                             if(otherChild.get_attribute("innerHTML") == shortCounty.replace(" ", "")):
                                 otherChild.click()
                                 cityState = True
@@ -412,81 +413,90 @@ class fufillOrders(EnviromentSetUp):
                         else:
                             continue
                         break
-
+                    # Making sure a city was clicked
                     if (cityState == False):
-                        print("City was not clicked in Taxes section")
-                        raise Exception("City Not Found")
+                        print("County was not clicked in Taxes section")
+                        raise Exception("County Not Found")
 
-                    cityField:WebElement = wait.until(EC.element_to_be_clickable((
+                    # Loop through all the cities and clicking it
+                    cityField: WebElement = wait.until(EC.element_to_be_clickable((
                         By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div[1]/div[2]/div/div[1]/div[2]/div/div[1]/div[1]/div[3]/div/div')))
                     cityField.click()
-                    time.sleep(0.25)
+                    time.sleep(inputTrans)
                     city = str(city).upper()
                     county = county.replace(" ", "")
                     betterCounty = county[0:4]
+                    # This is for infor spelling syntax
                     if(len(city) > 12):
                         betterCity = city[0:12]+"-"+betterCounty
                     else:
                         betterCity = city+"-"+betterCounty
-
-                    cityList:WebElement = wait.until(EC.visibility_of_element_located((
+                    cityList: WebElement = wait.until(EC.visibility_of_element_located((
                         By.XPATH, '/html/body/div[@id="dropdown-list"]/ul')))
-
+                    countyState = False
                     for child in cityList.find_elements(By.XPATH, './/*'):
                         for otherChild in child.find_elements(By.XPATH, './/*'):
-
                             if(otherChild.get_attribute("innerHTML") == betterCity.replace(" ", "")):
                                 otherChild.click()
+                                countyState = True
                                 break
                             elif(otherChild.get_attribute("innerHTML") == betterCity):
                                 otherChild.click()
+                                countyState = True
                                 break
                         else:
                             continue
                         break
+                    if (countyState == False):
+                        print("City was not clicked in Taxes section")
+                        raise Exception("City Not Found")
 
             except UnboundLocalError:
-                print("not defined")
+                print("Not defined")
+                raise
 
+            # Adding in freight
+            time.sleep(inputTrans)
             recalculate = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             recalculate.click()
-            time.sleep(3)
+            time.sleep(transition)
             addons: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
             addons.click()
-
-            addShipping = wait.until(EC.visibility_of_element_located(
+            print("Working on freight cost")
+            time.sleep(transition)
+            addShipping: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[1]/td[1]/div/button')))
             addShipping.click()
-
-            freightDropdown = wait.until(EC.element_to_be_clickable(
+            time.sleep(inputTrans)
+            freightDropdown: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[1]/div/div')))
             freightDropdown.click()
-
-            freight = wait.until(EC.element_to_be_clickable(
+            freight: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul/li[3]/a')))
             freight.click()
-
-            freightAmount = wait.until(EC.visibility_of_element_located(
+            freightAmount: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[1]/div/div/div[2]/input')))
             freightAmount.clear()
-            time.sleep(0.5)
+            time.sleep(inputTrans)
             freightAmount.send_keys(shipping)
-
-            finishFreight:WebElement = wait.until(EC.element_to_be_clickable((
+            finishFreight: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[2]/div[2]/div[2]/table/tbody/tr[2]/td/div/div/div/div/div/div[2]/div[2]/button[1]')))
             finishFreight.click()
-
-            goBack = wait.until(EC.element_to_be_clickable(
+            print("Finished Freight")
+            goBack: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[1]/div/button')))
-            time.sleep(2)
+            time.sleep(transition)
             goBack.click()
+            time.sleep(transition)
 
-            discounts = wait.until(EC.element_to_be_clickable(
+            # Working on inputing any discounts
+            discounts: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[4]')))
             discounts.click()
-
+            print("Working on Discounts")
+            # This hits backspace since infor doesn't allow to type a decimal
             discountAmount: WebElement = wait.until(EC.visibility_of_element_located(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[1]/input')))
             discountAmount.clear()
@@ -501,25 +511,21 @@ class fufillOrders(EnviromentSetUp):
             actions.perform()
             discountAmount.send_keys(Keys.BACKSPACE)
             discountAmount.send_keys(Keys.BACKSPACE)
-
             dec *= 100
             discountAmount.send_keys(int(dec))
-
-            discountDropdown:WebElement = wait.until(EC.element_to_be_clickable((
+            discountDropdown: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[2]/div/div/div[1]/div[2]/div/div/div[1]/div[1]/div[2]/div/div')))
             discountDropdown.click()
-
-            discountType:WebElement = wait.until(EC.element_to_be_clickable(
+            discountType: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[@id="dropdown-list"]/ul/li[1]/a')))
             discountType.click()
-
             discountAmount.click()
-
-            submit:WebElement = wait.until(EC.element_to_be_clickable((
+            time.sleep(inputTrans)
+            submit: WebElement = wait.until(EC.element_to_be_clickable((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/div[1]/div/form/div/div[1]/div/div[2]/button[1]')))
             submit.click()
-
-            finish:WebElement = wait.until(EC.element_to_be_clickable(
+            time.sleep(inputTrans)
+            finish: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[1]')))
             finish.click()
 

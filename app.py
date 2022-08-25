@@ -1,10 +1,6 @@
-
-# import PySimpleGUI as sgK
-
 import os
 
 import PySimpleGUI as sg
-import traceback
 from fufillOrders import fufillOrders
 from Utils import csvUtils
 
@@ -23,7 +19,7 @@ def setUpGui() -> sg.Window:
     layout = [
         # [sg.Titlebar(title='Order Automation')],
         [sg.Push(), sg.Text('Enter your infor Login!'), sg.Push()],
-        [sg.Push(), sg.Text('Version 1.3'), sg.Push()],
+        [sg.Push(), sg.Text('Order Automation: Version 1.4'), sg.Push()],
         [sg.Push(), sg.Text('', key="-Update-", text_color="red"), sg.Push()],
         [sg.Text('Username:'), sg.InputText(key="-Username-")],
         [sg.Text('Password:'), sg.InputText(key="-Password-")],
@@ -101,7 +97,7 @@ def main():
                     # Finishes up the order by doing taxes and shipping
                     try:
                         fufillOrders.finishOrder(
-                            value["shippingAmount"], value["discount"], value["shippingZip"],len(value["lineItems"]))
+                            value["shippingAmount"], value["discount"], value["shippingZip"], len(value["lineItems"]))
                     except Exception:
                         raise
 

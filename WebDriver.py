@@ -27,11 +27,10 @@ class EnviromentSetUp(webdriver.Chrome):
 
     @classmethod
     def setUp(cls):
-        config = ConfigParser()
-        config.read("config.ini")
-        CHROME_DRIVER_PATH = config.get("chromedriver", "path")
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+
         cls.web = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 
     @classmethod
