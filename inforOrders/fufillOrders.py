@@ -5,6 +5,7 @@ most of the selenium work will be done here.
 import json
 import math
 import time
+from configparser import ConfigParser
 import traceback
 
 from selenium.webdriver import ActionChains, Keys
@@ -14,9 +15,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from secret import inforAccountLogin, inforAccountPassword
-from Utils import jsonUtils
-from WebDriver import EnviromentSetUp
+from inforOrders.Utils import jsonUtils
+from inforOrders.WebDriver import EnviromentSetUp
 
+config = ConfigParser()
+config.read("config.ini")
 
 class fufillOrders(EnviromentSetUp):
 
@@ -28,7 +31,7 @@ class fufillOrders(EnviromentSetUp):
             password (str): password for infor
         """
         try:
-
+            print(config.get("time","transition"))
             # Setting up web objects to be passed around
             EnviromentSetUp.setUp()
             web = EnviromentSetUp.web
@@ -119,7 +122,7 @@ class fufillOrders(EnviromentSetUp):
             web = EnviromentSetUp.web
             wait = WebDriverWait(web, 10)
             longerWait = WebDriverWait(web, 30)
-            transition = 4
+            transition = config.get("time","transition")
             inputTrans = 0.5
 
             # Defining the customer number, which is dependent on the country
