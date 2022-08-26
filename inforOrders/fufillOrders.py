@@ -5,8 +5,8 @@ most of the selenium work will be done here.
 import json
 import math
 import time
-from configparser import ConfigParser
 import traceback
+from configparser import ConfigParser
 
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -14,7 +14,6 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from secret import inforAccountLogin, inforAccountPassword
 from inforOrders.Utils import jsonUtils
 from inforOrders.WebDriver import EnviromentSetUp
 
@@ -43,10 +42,10 @@ class fufillOrders(EnviromentSetUp):
             web.get("https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524?favoriteContext=oeet.initiate&LogicalId=lid://infor.sx.1")
             signInUser: WebElement = wait.until(
                 EC.element_to_be_clickable((By.XPATH, '//*[@id="userNameInput"]')))
-            signInUser.send_keys(inforAccountLogin)
+            signInUser.send_keys(config.get("infor","inforAccountLogin"))
             signInPassword: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="passwordInput"]')))
-            signInPassword.send_keys(inforAccountPassword)
+            signInPassword.send_keys(config.get("infor","inforAccountPassword"))
             signInSubmit: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="submitButton"]')))
             signInSubmit.click()
