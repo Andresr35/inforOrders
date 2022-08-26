@@ -346,7 +346,7 @@ class fufillOrders(EnviromentSetUp):
             print("Infor total:\t", inforTotalQuanity)
             print("Shop quant: \t", shopTotalQuantity)
             if(shopTotalQuantity == int(inforTotalQuanity)):
-                print("good!", "\n")
+                print("good!")
             else:
                 print("bad")
                 raise Exception("Total quantiy does not match")
@@ -537,17 +537,25 @@ class fufillOrders(EnviromentSetUp):
     def cancelFailedOrder() -> None:
         """cancels an order when a past cancled order goes wrong.
         """
+        # Setting up web objects to be passed around
         web = EnviromentSetUp.web
         wait = WebDriverWait(web, 10)
+        longerWait = WebDriverWait(web, 30)
+        transition = 4
+        inputTrans = 0.5
+
         try:
-            time.sleep(4)
+            time.sleep(transition)
             cancel: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[2]')))
             cancel.click()
+            time.sleep(inputTrans)
             create: WebElement = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[1]/div/div[2]/button[3]')))
             create.click()
+            time.sleep(inputTrans)
             print("Canceling the past failed order...continuing after this order")
+
         except Exception:
             traceback.print_exc()
             print("Could not cancel order, will have to abort all")

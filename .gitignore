@@ -4,3 +4,5 @@ __pycache__/
 sitePackages
 orders.csv
 secret.py
+build
+app.exe

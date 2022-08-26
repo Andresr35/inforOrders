@@ -103,7 +103,7 @@ def main():
 
                     # finished order and add to array
                     finishedOrders.append(key)
-                    print("Finished order " + key)
+                    print("Finished order " + key,"\n")
 
                 # Will relogin and cancel previous order then continue
                 except Exception:
