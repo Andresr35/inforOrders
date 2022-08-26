@@ -1,8 +1,8 @@
 import os
 
 import PySimpleGUI as sg
-from fufillOrders import fufillOrders
-from Utils import csvUtils
+from inforOrders.fufillOrders import fufillOrders
+from inforOrders.Utils import csvUtils
 
 
 def setUpGui() -> sg.Window:
