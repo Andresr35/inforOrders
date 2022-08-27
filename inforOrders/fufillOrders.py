@@ -1,6 +1,7 @@
 '''
 This file has all the functions for running through all the order steps in infor
 most of the selenium work will be done here.
+
 '''
 import json
 import math
@@ -17,10 +18,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from inforOrders.Utils import jsonUtils
 from inforOrders.WebDriver import EnviromentSetUp
 
+# Getting up env variables
 config = ConfigParser()
 config.read("config.ini")
 
+
 class fufillOrders(EnviromentSetUp):
+    """Base class moves the web driver around. This class holds 
+    all the functions that get around the infor website
+
+    Args:
+        EnviromentSetUp (Class): Base class for moving web driver around
+    """
 
     def login(user: str, password: str) -> None:
         """starts the web selenium server and logs into infor on company 40. Ends up taking you to order entry page
@@ -29,23 +38,25 @@ class fufillOrders(EnviromentSetUp):
             user (str): username for infor
             password (str): password for infor
         """
+        
         try:
-            print(config.get("time","transition"))
-            # Setting up web objects to be passed around
+
+            # Setting up web objects to be passed around and timeouts
             EnviromentSetUp.setUp()
             web = EnviromentSetUp.web
-            wait = WebDriverWait(web, 30)
-            longerWait = WebDriverWait(web, 120)
-            transition = 4
+            wait = WebDriverWait(web, 30)#FIXME: make this a config.ini
+            longerWait = WebDriverWait(web, 60)
+            transition = float(config.get("time","transition"))
 
             # This is the link to the Order Entry page. First asks to login to infor account and then personal infor account.
             web.get("https://xisrv.stronghandtools.com/infor/d7de089b-7e09-4476-a5f5-80697edc7524?favoriteContext=oeet.initiate&LogicalId=lid://infor.sx.1")
             signInUser: WebElement = wait.until(
                 EC.element_to_be_clickable((By.XPATH, '//*[@id="userNameInput"]')))
-            signInUser.send_keys(config.get("infor","inforAccountLogin"))
+            signInUser.send_keys(config.get("infor", "inforAccountLogin"))
             signInPassword: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="passwordInput"]')))
-            signInPassword.send_keys(config.get("infor","inforAccountPassword"))
+            signInPassword.send_keys(config.get(
+                "infor", "inforAccountPassword"))
             signInSubmit: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '//*[@id="submitButton"]')))
             signInSubmit.click()
@@ -92,8 +103,6 @@ class fufillOrders(EnviromentSetUp):
                         (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
                 except:
                     raise
-            customerField = wait.until(EC.visibility_of_element_located(
-                (By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[1]/span/input')))
 
             print("Logged in!")
 
@@ -119,10 +128,10 @@ class fufillOrders(EnviromentSetUp):
 
             # Setting up web objects to be passed around
             web = EnviromentSetUp.web
-            wait = WebDriverWait(web, 10)
+            wait = WebDriverWait(web, float(config.get("time", "wait")))
             longerWait = WebDriverWait(web, 30)
-            transition = config.get("time","transition")
-            inputTrans = 0.5
+            transition = float(config.get("time", "transition"))
+            inputTrans = float(config.get("time", "inputTransition"))
 
             # Defining the customer number, which is dependent on the country
             # state, and method of payment
@@ -155,10 +164,10 @@ class fufillOrders(EnviromentSetUp):
             except:
                 print("Only 'Paypal Express Checkout' and 'Shopify Payments' is accepted as a payment method. '",
                       method, "' was entered.")
-                raise Exception("Invalid Payment Method entered.")
+                raise Exception("Invalid Payment Method entered. Manual Order Entry required")
             warehouse: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[1]/div[2]/span/input')))
-            warehouse.send_keys('V01')
+            warehouse.send_keys('V01')#NOTE: This is the warehouse Valtra. Can change if company scales up
             time.sleep(inputTrans)
             shipvia: WebElement = wait.until(EC.visibility_of_element_located((
                 By.XPATH, '/html/body/div[2]/div/div/div/section[3]/div/div/div/form/div/div[2]/div/div[2]/div/div/div[2]/div[2]/span/input')))
@@ -192,10 +201,10 @@ class fufillOrders(EnviromentSetUp):
 
         # Setting up web objects to be passed around
         web = EnviromentSetUp.web
-        wait = WebDriverWait(web, 10)
+        wait = WebDriverWait(web, float(config.get("time", "wait")))
         longerWait = WebDriverWait(web, 30)
-        transition = 4
-        inputTrans = 0.5
+        transition = float(config.get("time", "transition"))
+        inputTrans = float(config.get("time", "inputTransition"))
 
         try:
             # Start inputting address of the customer
@@ -280,10 +289,10 @@ class fufillOrders(EnviromentSetUp):
         try:
             # Setting up web objects to be passed around
             web = EnviromentSetUp.web
-            wait = WebDriverWait(web, 10)
+            wait = WebDriverWait(web, float(config.get("time", "wait")))
             longerWait = WebDriverWait(web, 30)
-            transition = 4
-            inputTrans = 0.5
+            transition = float(config.get("time", "transition"))
+            inputTrans = float(config.get("time", "inputTransition"))
 
             # Starting to input products to line item section.
             time.sleep(transition)
@@ -325,10 +334,10 @@ class fufillOrders(EnviromentSetUp):
         try:
             # Setting up web objects to be passed around
             web = EnviromentSetUp.web
-            wait = WebDriverWait(web, 10)
+            wait = WebDriverWait(web, float(config.get("time", "wait")))
             longerWait = WebDriverWait(web, 30)
-            transition = 4
-            inputTrans = 0.5
+            transition = float(config.get("time", "transition"))
+            inputTrans = float(config.get("time", "inputTransition"))
 
             # Getting the County from Zip code,and other address values.
             data = json.loads(open("cities.json").read())
