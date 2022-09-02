@@ -92,7 +92,7 @@ class csvUtils:
         """
         # Setting up csv writer
         headings = ["Order", "Status"]
-        file = open('../orders.csv', 'w', encoding='UTF8')
+        file = open('./orders.csv', 'w', encoding='UTF8')
         writer = csv.writer(file)
 
         # Writing the rows to csv
@@ -116,6 +116,6 @@ class jsonUtils:
         Returns:
             dict: dict holding the code as the key and the name as the value
         """
-        with open('./assets/names.json') as json_file:
+        with open('./inforOrders/assets/names.json') as json_file:
             data = json.load(json_file)
             return data

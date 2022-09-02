@@ -340,7 +340,7 @@ class fufillOrders(EnviromentSetUp):
             inputTrans = float(config.get("time", "inputTransition"))
 
             # Getting the County from Zip code,and other address values.
-            data = json.loads(open("cities.json").read())
+            data = json.loads(open("./inforOrders/assets/cities.json").read())
             state = ''
             for i in data:
                 if str(i['zip_code']) == str(zip):
